@@ -1,0 +1,6 @@
+@The_Last_Dance_Project_HostAddress = http://localhost:5156
+
+GET {{The_Last_Dance_Project_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
