@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace The_Last_Dance_Project.Models
 {
@@ -37,11 +38,17 @@ namespace The_Last_Dance_Project.Models
         public string? RejectDes { get; set; }
 
         // Auth Fields
-        public string? UserName { get; set; }
+        [Required]
+        [StringLength(50)]
+        public string UserName { get; set; }
         public string? PasswordHash { get; set; }
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
+        [StringLength(50)]
         public string? RoleId { get; set; }
+
+        [ForeignKey("RoleId")]
+        public virtual Role? Role { get; set; }
 
         public string? CreatedBy { get; set; }
         public DateTime? CreatedDate { get; set; }
