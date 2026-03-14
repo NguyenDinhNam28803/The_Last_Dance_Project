@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using The_Last_Dance_Project.Models;
 
 namespace The_Last_Dance_Project.Data

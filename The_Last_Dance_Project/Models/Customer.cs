@@ -36,6 +36,13 @@ namespace The_Last_Dance_Project.Models
         public string? OpenVia { get; set; }
         public string? RejectDes { get; set; }
 
+        // Auth Fields
+        public string? UserName { get; set; }
+        public string? PasswordHash { get; set; }
+        public string? Email { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? RoleId { get; set; }
+
         public string? CreatedBy { get; set; }
         public DateTime? CreatedDate { get; set; }
         public string? LastChangeBy { get; set; }

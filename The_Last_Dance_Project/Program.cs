@@ -4,6 +4,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using The_Last_Dance_Project.Data;
+using The_Last_Dance_Project.Interface;
+using The_Last_Dance_Project.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,9 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IJwtInterface, JWTService>();
+builder.Services.AddScoped<IAuthInterface, AuthService>();
 
 builder.Services.AddAuthentication(options =>
 {
