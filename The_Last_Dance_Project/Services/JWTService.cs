@@ -18,7 +18,7 @@ namespace The_Last_Dance_Project.Services
             _secretKey = Encoding.UTF8.GetBytes(_configuration["JwtSettings:SecretKey"] ?? throw new InvalidOperationException("JwtSettings:SecretKey not configured."));
         }
 
-        public JwtTokenDto GenerateJwtTokens(string userId, string roleName, string userName)
+        public JwtTokenDto GenerateJwtTokens(string userId, string roleName, string userName, bool rememberMe = false)
         {
             var claims = new[]
             {
@@ -30,7 +30,13 @@ namespace The_Last_Dance_Project.Services
             };
 
             var accessTokenExpiresMinutes = double.Parse(_configuration["JwtSettings:AccessTokenExpirationMinutes"] ?? "15");
-            var refreshTokenExpiresMinutes = double.Parse(_configuration["JwtSettings:RefreshTokenExpirationMinutes"] ?? "10080"); // 7 days
+
+            // Nếu chọn Remember Me, tăng thời hạn Refresh Token (ví dụ: 30 ngày), ngược lại để mặc định (7 ngày)
+            var refreshTokenExpirationStr = rememberMe
+                ? (_configuration["JwtSettings:RememberMeExpirationMinutes"] ?? "43200") // 30 days
+                : (_configuration["JwtSettings:RefreshTokenExpirationMinutes"] ?? "10080"); // 7 days
+
+            var refreshTokenExpiresMinutes = double.Parse(refreshTokenExpirationStr);
 
             var accessToken = GenerateToken(claims, accessTokenExpiresMinutes);
             var refreshToken = GenerateToken(claims, refreshTokenExpiresMinutes); // Refresh token can also carry claims or be a simple string
@@ -110,7 +116,7 @@ namespace The_Last_Dance_Project.Services
             // Here, you would typically also verify the refresh token against a stored one in your database
             // to ensure it hasn't been revoked and matches the user. For this example, we skip the database check.
 
-            return GenerateJwtTokens(userId, roleName, userName);
+            return GenerateJwtTokens(userId, roleName, userName, false); // Default to false on refresh unless persisted
         }
 
         private ClaimsPrincipal? ValidateRefreshToken(string refreshToken)

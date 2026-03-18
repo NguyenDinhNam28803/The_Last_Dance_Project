@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.EntityFrameworkCore;
 using The_Last_Dance_Project.Data;
 using The_Last_Dance_Project.Dto;
@@ -48,7 +47,7 @@ namespace The_Last_Dance_Project.Services
                         if (role != null) roleName = role.DisplayValue;
                     }
 
-                    var token = _jwtService.GenerateJwtTokens(customer.CustId, roleName, customer.UserName ?? customer.Name);
+                    var token = _jwtService.GenerateJwtTokens(customer.CustId, roleName, customer.UserName ?? customer.Name, rememberMe);
 
                     var response = new UserInforReponse
                     {
@@ -104,21 +103,13 @@ namespace The_Last_Dance_Project.Services
                     PhoneNumber = phoneNumber,
                     RecordStatus = "1",
                     Status = "Active",
-                    CreatedDate = DateTime.Now
+                    CreatedDate = DateTime.UtcNow
                 };
 
                 _context.Customers.Add(newCustomer);
                 await _context.SaveChangesAsync();
 
-                var token = _jwtService.GenerateJwtTokens(newCustomer.CustId, "User", newCustomer.UserName);
-                return new UserInforReponse
-                {
-                    Authorization = token,
-                    UserId = newCustomer.CustId,
-                    UserName = newCustomer.UserName,
-                    Email = newCustomer.Email,
-                    PhoneNumber = newCustomer.PhoneNumber
-                };
+                return await LoginUser(userName, password);
             }
             catch (Exception ex)
             {
@@ -130,15 +121,16 @@ namespace The_Last_Dance_Project.Services
         {
             try
             {
-                var handler = new JwtSecurityTokenHandler();
+                if (string.IsNullOrEmpty(token)) return false;
+
+                var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
                 var jwtToken = handler.ReadJwtToken(token);
-                var expiryDate = jwtToken.ValidTo;
+                var expiry = jwtToken.ValidTo;
 
                 var blacklistEntry = new TokenBlacklist
                 {
                     Token = token,
-                    ExpiryDate = expiryDate,
-                    BlacklistedAt = DateTime.UtcNow
+                    ExpiryDate = expiry
                 };
 
                 _context.TokenBlacklists.Add(blacklistEntry);
