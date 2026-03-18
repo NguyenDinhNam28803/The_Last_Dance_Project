@@ -23,6 +23,9 @@ namespace The_Last_Dance_Project.Data
         public DbSet<SystemCode> SystemCodes { get; set; }
         public DbSet<SystemCodeValue> SystemCodeValues { get; set; }
 
+        // 4. Quản lý Token
+        public DbSet<TokenBlacklist> TokenBlacklists { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

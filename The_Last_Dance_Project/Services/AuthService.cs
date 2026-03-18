@@ -1,8 +1,10 @@
+using System.Text.RegularExpressions;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.EntityFrameworkCore;
 using The_Last_Dance_Project.Data;
 using The_Last_Dance_Project.Dto;
 using The_Last_Dance_Project.Interface;
 using The_Last_Dance_Project.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace The_Last_Dance_Project.Services
 {
@@ -17,7 +19,14 @@ namespace The_Last_Dance_Project.Services
             _jwtService = jwtService;
         }
 
-        public async Task<UserInforReponse> LoginUser(string userName, string password)
+        private bool ValidatePassword(string password)
+        {
+            // Regex: Minimum 8 characters, at least 1 uppercase, 1 lowercase, 1 number and 1 special character
+            var regex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$");
+            return regex.IsMatch(password);
+        }
+
+        public async Task<UserInforReponse> LoginUser(string userName, string password, bool rememberMe = false)
         {
             try
             {
@@ -31,8 +40,6 @@ namespace The_Last_Dance_Project.Services
 
                 if (checkPassword)
                 {
-                    // Lấy RoleName từ SystemCodeValue nếu RoleId được lưu ở đó, 
-                    // hoặc mặc định là "User" nếu không tìm thấy
                     var roleName = "User";
                     if (!string.IsNullOrEmpty(customer.RoleId))
                     {
@@ -42,14 +49,15 @@ namespace The_Last_Dance_Project.Services
                     }
 
                     var token = _jwtService.GenerateJwtTokens(customer.CustId, roleName, customer.UserName ?? customer.Name);
-                    
+
                     var response = new UserInforReponse
                     {
                         Authorization = token,
                         UserId = customer.CustId,
                         UserName = customer.UserName ?? customer.Name,
                         Email = customer.Email ?? "",
-                        PhoneNumber = customer.PhoneNumber ?? ""
+                        PhoneNumber = customer.PhoneNumber ?? "",
+                        Role = roleName
                     };
                     return response;
                 }
@@ -68,6 +76,11 @@ namespace The_Last_Dance_Project.Services
         {
             try
             {
+                if (!ValidatePassword(password))
+                {
+                    throw new Exception("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character.");
+                }
+
                 var userExists = await _context.Customers.AnyAsync(u => u.UserName == userName || u.Email == email);
                 if (userExists)
                 {
@@ -80,16 +93,16 @@ namespace The_Last_Dance_Project.Services
                 }
 
                 var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
-                
+
                 var newCustomer = new Customer
                 {
-                    CustId = Guid.NewGuid().ToString().Substring(0, 20), // Giới hạn 20 ký tự theo StringLength(20)
-                    Name = userName, // Sử dụng UserName làm Name mặc định
+                    CustId = Guid.NewGuid().ToString().Substring(0, 20),
+                    Name = userName,
                     UserName = userName,
                     PasswordHash = hashedPassword,
                     Email = email,
                     PhoneNumber = phoneNumber,
-                    RecordStatus = "1", // Mặc định Active
+                    RecordStatus = "1",
                     Status = "Active",
                     CreatedDate = DateTime.Now
                 };
@@ -105,6 +118,66 @@ namespace The_Last_Dance_Project.Services
                     UserName = newCustomer.UserName,
                     Email = newCustomer.Email,
                     PhoneNumber = newCustomer.PhoneNumber
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<bool> LogoutUser(string token)
+        {
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(token);
+                var expiryDate = jwtToken.ValidTo;
+
+                var blacklistEntry = new TokenBlacklist
+                {
+                    Token = token,
+                    ExpiryDate = expiryDate,
+                    BlacklistedAt = DateTime.UtcNow
+                };
+
+                _context.TokenBlacklists.Add(blacklistEntry);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> IsTokenBlacklisted(string token)
+        {
+            return await _context.TokenBlacklists.AnyAsync(t => t.Token == token);
+        }
+
+        public async Task<UserInforReponse> CheckSession(string userId)
+        {
+            try
+            {
+                var customer = await _context.Customers.FirstOrDefaultAsync(u => u.CustId == userId);
+                if (customer == null) throw new Exception("User not found");
+
+                var roleName = "User";
+                if (!string.IsNullOrEmpty(customer.RoleId))
+                {
+                    var role = await _context.SystemCodeValues
+                        .FirstOrDefaultAsync(v => v.CodeValue == customer.RoleId);
+                    if (role != null) roleName = role.DisplayValue;
+                }
+
+                return new UserInforReponse
+                {
+                    UserId = customer.CustId,
+                    UserName = customer.UserName ?? customer.Name,
+                    Email = customer.Email ?? "",
+                    PhoneNumber = customer.PhoneNumber ?? "",
+                    Role = roleName
                 };
             }
             catch (Exception ex)

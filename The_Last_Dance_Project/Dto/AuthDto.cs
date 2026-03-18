@@ -24,6 +24,8 @@ namespace The_Last_Dance_Project.Dto
 
         [Required(ErrorMessage = "Password is required.")]
         public string Password { get; set; } = string.Empty;
+
+        public bool RememberMe { get; set; } = false;
     }
 
     public class UserInforReponse
@@ -33,6 +35,7 @@ namespace The_Last_Dance_Project.Dto
         public string UserName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
     }
 
     public class TokenRefreshRequestDto
