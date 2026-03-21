@@ -77,7 +77,8 @@ namespace The_Last_Dance_Project.Data
                 entity.Property(e => e.Name).HasMaxLength(100);
 
                 entity.HasData(
-                    new SystemCode { SystemCodeId = "ROLE", Name = "Role definitions", Description = "Application roles" }
+                    new SystemCode { SystemCodeId = "ROLE", Name = "Role definitions", Description = "Application roles" },
+                    new SystemCode { SystemCodeId = "STATUS", Name = "Transaction Status", Description = "Statuses for MTTRAN" }
                 );
             });
 
@@ -86,37 +87,22 @@ namespace The_Last_Dance_Project.Data
                 entity.HasData(
                     new SystemCodeValue { Id = 1001, SystemCodeId = "ROLE", CodeValue = "ADMIN", DisplayValue = "Administrator", DisplayValueEn = "Administrator", OrderBy = 1, IsDefault = "N" },
                     new SystemCodeValue { Id = 1002, SystemCodeId = "ROLE", CodeValue = "USER", DisplayValue = "User", DisplayValueEn = "User", OrderBy = 2, IsDefault = "Y" },
-                    new SystemCodeValue { Id = 1003, SystemCodeId = "ROLE", CodeValue = "MANAGER", DisplayValue = "Manager", DisplayValueEn = "Manager", OrderBy = 3, IsDefault = "N" }
+                    new SystemCodeValue { Id = 1003, SystemCodeId = "ROLE", CodeValue = "MANAGER", DisplayValue = "Manager", DisplayValueEn = "Manager", OrderBy = 3, IsDefault = "N" },
+                    new SystemCodeValue { Id = 1004, SystemCodeId = "ROLE", CodeValue = "MAKER", DisplayValue = "Maker", DisplayValueEn = "Maker", OrderBy = 4, IsDefault = "N" },
+                    new SystemCodeValue { Id = 1005, SystemCodeId = "ROLE", CodeValue = "CHECKER", DisplayValue = "Checker", DisplayValueEn = "Checker", OrderBy = 5, IsDefault = "N" }
                 );
             });
 
-            // Cấu hình Customer và Contact
-            modelBuilder.Entity<CustomerContact>(entity => {
-                entity.ToTable("CUSTOMER_CONTACT");
-                entity.HasKey(e => e.ContactId);
-
-                entity.HasOne<Customer>()
-                    .WithMany()
-                    .HasForeignKey(d => d.CustId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
-
-            // Cấu hình Role
-            modelBuilder.Entity<Role>(entity => {
-                entity.ToTable("ROLE");
-                entity.HasKey(e => e.RoleId);
-                entity.Property(e => e.RoleId).HasMaxLength(50);
-                entity.Property(e => e.Name).HasMaxLength(100);
-                // Seed sample roles
-                entity.HasData(
-                    new Role { RoleId = "ADMIN", Name = "Administrator", Description = "System administrator with full permissions" },
-                    new Role { RoleId = "USER", Name = "User", Description = "Default application user" },
-                    new Role { RoleId = "MANAGER", Name = "Manager", Description = "User with managerial permissions" }
-                );
-            });
-
-            // Cấu hình quan hệ Customer -> Role (RoleId)
+            // Cấu hình Customer
             modelBuilder.Entity<Customer>(entity => {
+                entity.ToTable("CUSTOMER");
+                entity.HasKey(e => e.CustId);
+                
+                entity.HasData(
+                    new Customer { CustId = "USR001", UserName = "maker_trung", Name = "Nguyễn Văn Maker", RoleId = "MAKER", Status = "Active" },
+                    new Customer { CustId = "USR002", UserName = "checker_lan", Name = "Trần Thị Checker", RoleId = "CHECKER", Status = "Active" }
+                );
+
                 entity.HasOne<Role>()
                     .WithMany()
                     .HasForeignKey(d => d.RoleId)
