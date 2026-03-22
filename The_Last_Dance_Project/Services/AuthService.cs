@@ -1,8 +1,8 @@
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using The_Last_Dance_Project.Data;
-using The_Last_Dance_Project.Dto;
-using The_Last_Dance_Project.Interface;
+using The_Last_Dance_Project.Dtos;
+using The_Last_Dance_Project.Interfaces;
 using The_Last_Dance_Project.Models;
 
 namespace The_Last_Dance_Project.Services
@@ -179,3 +179,4 @@ namespace The_Last_Dance_Project.Services
         }
     }
 }
+

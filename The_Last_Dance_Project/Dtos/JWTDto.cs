@@ -1,4 +1,4 @@
-﻿namespace The_Last_Dance_Project.Dto
+namespace The_Last_Dance_Project.Dtos
 {
     public class JwtTokenDto
     {

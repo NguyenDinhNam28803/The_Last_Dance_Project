@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using The_Last_Dance_Project.Dto;
-using The_Last_Dance_Project.Interface;
+using The_Last_Dance_Project.Dtos;
+using The_Last_Dance_Project.Interfaces;
 
 namespace The_Last_Dance_Project.Controllers
 {
@@ -99,3 +99,4 @@ namespace The_Last_Dance_Project.Controllers
         }
     }
 }
+

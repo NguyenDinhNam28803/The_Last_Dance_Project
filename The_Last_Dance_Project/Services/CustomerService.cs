@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using The_Last_Dance_Project.Data;
-using The_Last_Dance_Project.Dto;
+using The_Last_Dance_Project.Dtos;
 using The_Last_Dance_Project.Models;
+using The_Last_Dance_Project.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
@@ -174,3 +175,4 @@ namespace The_Last_Dance_Project.Services
         #endregion
     }
 }
+

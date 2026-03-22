@@ -3,16 +3,10 @@ using System.Threading.Tasks;
 using The_Last_Dance_Project.Data;
 using The_Last_Dance_Project.Models;
 using Microsoft.EntityFrameworkCore;
+using The_Last_Dance_Project.Interfaces;
 
 namespace The_Last_Dance_Project.Services
 {
-    public interface IMakerCheckerService
-    {
-        Task<bool> SubmitRequestAsync(string entityName, string entityId, string action, string makerId, string details);
-        Task<bool> ApproveRequestAsync(int mtTranId, string checkerId);
-        Task<bool> RejectRequestAsync(int mtTranId, string checkerId, string reason);
-    }
-
     public class MakerCheckerService : IMakerCheckerService
     {
         private readonly ApplicationDbContext _db;
@@ -39,6 +33,19 @@ namespace The_Last_Dance_Project.Services
             };
 
             _db.Auditentities.Add(auditEntity);
+            return await _db.SaveChangesAsync() > 0;
+        }
+
+        // MAKER: Hủy yêu cầu của chính mình
+        public async Task<bool> CancelRequestAsync(int mtTranId, string makerId)
+        {
+            var request = await _db.Auditentities.FindAsync((long)mtTranId);
+            // Chỉ cho phép hủy nếu là người tạo và yêu cầu vẫn đang chờ duyệt (N)
+            if (request == null || request.MtlStatus != "N" || request.Maker != makerId) return false;
+
+            request.MtlStatus = "C"; // C: Cancelled
+            request.Description = "Maker cancelled request.";
+
             return await _db.SaveChangesAsync() > 0;
         }
 

@@ -1,6 +1,7 @@
-using The_Last_Dance_Project.Dto;
+using System.Threading.Tasks;
+using The_Last_Dance_Project.Dtos;
 
-namespace The_Last_Dance_Project.Interface
+namespace The_Last_Dance_Project.Interfaces
 {
     public interface IAuthInterface
     {

@@ -1,9 +1,9 @@
-﻿using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using The_Last_Dance_Project.Dto;
-using The_Last_Dance_Project.Interface;
+using The_Last_Dance_Project.Dtos;
+using The_Last_Dance_Project.Interfaces;
 
 namespace The_Last_Dance_Project.Services
 {
@@ -31,7 +31,7 @@ namespace The_Last_Dance_Project.Services
 
             var accessTokenExpiresMinutes = double.Parse(_configuration["JwtSettings:AccessTokenExpirationMinutes"] ?? "15");
 
-            // Nếu chọn Remember Me, tăng thời hạn Refresh Token (ví dụ: 30 ngày), ngược lại để mặc định (7 ngày)
+            // N?u ch?n Remember Me, tang th?i h?n Refresh Token (v� d?: 30 ng�y), ngu?c l?i d? m?c d?nh (7 ng�y)
             var refreshTokenExpirationStr = rememberMe
                 ? (_configuration["JwtSettings:RememberMeExpirationMinutes"] ?? "43200") // 30 days
                 : (_configuration["JwtSettings:RefreshTokenExpirationMinutes"] ?? "10080"); // 7 days
@@ -149,3 +149,4 @@ namespace The_Last_Dance_Project.Services
         }
     }
 }
+
