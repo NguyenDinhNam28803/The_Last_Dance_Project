@@ -10,6 +10,8 @@ using The_Last_Dance_Project.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<The_Last_Dance_Project.Validators.RegisterRequestValidator>();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -20,6 +22,8 @@ builder.Services.AddScoped<IAuthInterface, AuthService>();
 builder.Services.AddScoped<IMakerCheckerService, MakerCheckerService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<ICustomerContactService, CustomerContactService>();
+builder.Services.AddScoped<IAuditService, AuditService>();
+builder.Services.AddScoped<ISystemCodeService, SystemCodeService>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -85,6 +89,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseMiddleware<The_Last_Dance_Project.Middleware.ExceptionHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
