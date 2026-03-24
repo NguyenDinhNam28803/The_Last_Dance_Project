@@ -1,0 +1,1278 @@
+CÔNG TY CỔ PHẦN GIẢI PHÁP VÀ DỊCH VỤ PHẦN MỀM NAM VIỆT
+TÀI LIỆU ĐẶC TẢ YÊU CẦU NGƯỜI SỬ DỤNG 
+PHÂN HỆ 
+KHÁCH HÀNG
+THUỘC HỆ THỐNG GIAO DỊCH CHỨNG KHOÁN
+Mã hiệu dự án:
+Mã hiệu tài liệu: URD
+Phiên bản tài liệu: V1.0
+Hà Nội
+Bảng ghi nhận thay đổi tài liệu
+Ngày thay đổi
+Vị trí t
+hay đổi
+Mô tả
+Phiên bản
+Người chỉnh sửa 
+MỤC LỤC
+1
+TỔNG QUAN TÀI LIỆU
+5
+1.1
+Mục đích
+5
+1.2
+Tài liệu tham khảo
+5
+1.3
+Thuật ngữ và từ viết tắt
+5
+1.4
+Nguyên tắc áp dụng chung
+6
+1.5
+Các trường dữ liệu dùng chung
+6
+2
+giao diện chung
+8
+1.
+Toolbar
+10
+2.
+Tìm kiếm
+12
+3.
+Thêm mới
+13
+4.
+Cập nhật
+14
+5.
+Hủy
+15
+6.
+Xóa
+17
+7.
+Từ chối/ Duyệt
+18
+8.
+Auditrail
+20
+9.
+Copy
+21
+10.
+Clear
+22
+11.
+Refresh
+23
+12.
+Kết quả tìm kiếm
+23
+13.
+Tìm kiếm nhanh chức năng
+28
+14.
+Các dạng thông báo của hệ thống
+29
+3
+KHách hàng (cLIENT)
+33
+3.2.1
+Mục đích
+33
+3.2.2
+Màn hình và các trường dữ liệu
+33
+3.2.3
+Yêu cầu nghiệp vụ
+46
+3.2.4
+Danh sách loại hình tổ chức (Institution Type)
+51
+4
+Màn hình Login
+57
+4.2.1
+Mục đích:
+57
+Màn hình đăng nhập dành cho CBNV đăng nhập vào hệ thống BO, hỗ trợ tính năng Ghi nhớ mật khẩu
+57
+4.2.2
+Màn hình và các trường dữ liệu
+57
+4.2.3
+Yêu cầu nghiệp vụ
+59
+5
+giao diện minh họa màn hình CLIENT
+60
+TỔNG QUAN TÀI LIỆU
+Mục đích
+Tài liệu tham khảo
+Thuật ngữ và từ viết tắt
+Thuật ngữ/ từ viết tắt
+Ý nghĩa
+Ghi chú
+VSD
+Trung tâm lưu ký chứng khoán Việt Nam
+CTCK
+Công ty chứng khoán
+CBNV
+Cán bộ nghiệp vụ
+KH
+Khách hàng
+CK
+Chứng khoán
+Nguyên tắc áp dụng
+ chung
+Các trường dữ liệu
+ dùng chung
+Các trường dữ liệu có thể thêm hoặc tách/gộp theo yêu cầu nghiệp vụ hoặc giải pháp xây dựng, phát triển hệ thống trong giai đoạn thiết kế chi tiết màn hình và chức năng hệ thống.
+STT
+Tên trường (TV)
+Tên trường (TA)
+Kiểu dữ liệu
+Bắt buộc
+Chỉnh sửa
+Mô tả
+Thời gian tạo
+Created On
+Date (dd/mm/yyyy hh:mm:ss)
+Không
+Không
+Thời gian tạo thông tin. 
+Tại màn hình thêm mới, mặc định lấy theo ngày hiện tại của hệ thống định dạng dd/mm/yyyy và không cho phép sửa.
+Tại màn hình (Xem chi tiết, Danh sách, Audit trail) hiển thị thời gian tạo theo định dạng dd/mm/yyyy hh:mm:ss
+Người tạo
+Created By
+Text
+Không
+Không
+User
+Id
+ của người tạo thông tin
+Thời gian cập nhật
+Updated On
+Date (dd/mm/yyyy hh:mm:ss)
+Không
+Không
+Thời gian cập nhật thông tin.
+Có bắt buộc tại màn hình Danh sách, Xem chi tiết lấy thời gian của lần chỉnh sửa gần nhất.
+Tại màn hình Audit trail ghi nhận thời gian cập nhật của từng lần thực hiện.
+Người cập nhật
+Updated By
+Text
+Không
+Không
+User
+Id
+ của người cập nhật thông tin.
+Có bắt buộc tại màn hình Danh sách, Xem chi tiết lấy Username của lần chỉnh sửa gần nhất.
+Tại màn hình Audit trail ghi nhận đầy đủ Username của từng lần thực hiện.
+Thời gian duyệt
+Approved On
+Date (dd/mm/yyyy hh:mm:ss)
+Không
+Không
+Thời gian phê duyệt (Duyệt/ Từ chối) thông tin:
+Có bắt buộc tại màn hình Danh sách; Xem chi tiết lấy thời gian phê duyệt của lần thực hiện gần nhất.
+Tại màn hình Audit Trail ghi nhận đầy đủ thời gian phê duyệt của từng lần thực hiện.
+Người duyệt
+Approved By
+Text
+Không
+Không
+User
+Id
+ của người phê duyệt (Duyệt/ Từ chối) thông tin:
+Có bắt buộc tại màn hình Danh sách; Xem chi tiết lấy user
+Id
+ phê duyệt của lần thực hiện gần nhất.
+Tại màn hình Audit Trail ghi nhận đầy đủ User
+Id
+ phê duyệt của từng lần thực hiện.
+giao diện chung
+Giao diện chung của hầu hết các cửa sổ chức năng trong hệ thống sẽ gồm các phần chính như ảnh bên dưới:
+Hình 
+1
+: Ví dụ về giao diện chung
+(1): Thanh menu chức năng
+(2): Thanh công cụ (Toolbar)
+(3): Vùng thể hiện thông tin chi tiết cho một bản ghi
+(4): Vùng Kết quả Tìm kiếm: hiển thị kết quả tìm kiếm. Click chuột vào một bản ghi, thông tin chi tiết của bản ghi sẽ được hiển thị ở vùng (3)
+(5): Thanh trạng thái: trạng thái kết nối của hệ thống, chọn ngôn ngữ hiển thị, user đang đăng nhập, phiên bản phần mềm, Ngày của hệ thống
+Toolbar
+Màn hình dành cho Maker:
+Hình 
+2
+: Toolbar tại màn hình dành cho Maker
+Màn hình dành cho Checker:
+Hình 
+3
+: Toolbar tại màn hình dành cho Checker
+Icon
+Tên chức năng
+Maker
+Checker
+Mô tả
+Tìm kiếm
+X
+X
+Tìm kiếm thông tin
+Thêm mới
+X
+ 
+Thêm mới một đối tượng
+Duyệt
+ 
+X
+Checker đồng ý thêm/sửa đổi thông tin
+, sáng và cho phép thao tác khi chọn 1 bản ghi
+Từ chối
+ 
+X
+Checker từ chối thêm/sửa đổi thông tin
+, sáng và cho phép thao tác khi chọn 1 bản ghi
+Hủy (Hủy change)
+X
+X
+Hủy bản ghi ‘Chờ duyệt’ hoặc ‘Từ chối’
+, sáng và cho phép thao tác khi chọn 1 bản ghi
+Lưu (Lưu)
+X
+ 
+Lưu dữ liệu vừa thêm hoặc sửa đổi
+Xóa (Deleted record)
+X
+Xóa bản ghi ‘Đã duyệt’
+, sáng và cho phép thao tác khi chọn 1 bản ghi có trạng thái Đã duyệt
+Copy record
+X
+ 
+Dùng để tạo nhanh một bản ghi mới dựa trên dữ liệu của bản ghi hiện tại. 
+Xóa dữ liệu
+X
+X
+Xóa dữ liệu vừa nhập
+Chỉ áp dụng cho mode Tìm kiếm
+Làm mới
+X
+X
+Làm mới thông tin 
+Audit trail
+X
+X
+Kiểm tra lại lịch sử thay đổi của bản ghi
+, sáng và cho phép thao tác khi chọn 1 bản ghi
+Import file
+X
+ 
+Thực hiện import dữ liệu hàng loạt vào hệ thống theo mẫu file có sẵn của hệ thống
+Tìm kiếm
+Mục đích:
+Tìm kiếm bản ghi thỏa mãn theo tiêu chí tìm kiếm 
+Hình 
+4
+: Vị trí nút Tìm kiếm trên toolbar
+Nguyên tắc Tìm kiếm: Hệ thống hỗ trợ Tìm kiếm nhanh, nhiều tiêu chí với nhiều kiểu Tìm kiếm (sử dụng ký tự *, xem ví dụ bên dưới). Áp dụng cho cả màn hình của Maker và Checkr:
+ MIN* → tìm tất cả mã bắt đầu bằng “MIN” (gần đúng)
+ *MIN → tìm tất cả mã có kết thúc bằng “MIN” (gần đúng)
+ *MIN* → tìm tất cả mã có chứa “MIN” (gần đúng)
+ MIN003 → tìm chính xác mã “MIN003”
+Thao tác:
+Trường hợp 1
+: Tìm kiếm tất cả bản ghi 
+Bước 1: Bấm  “Tìm kiếm”
+Bước 2: Kết quả tìm kiếm sẽ hiển thị tại vùng (4) kết quả Tìm kiếm, vùng (3) mặc định hiển thị chi tiết của bản ghi đầu tiên trong danh sách kết quả. 
+Trường hợp 2
+: Tìm kiếm theo tiêu chí 
+Bước 1: Nhập giá trị Tìm kiếm (Các trường dropdown cho phép chọn nhiều giá trị) 
+Bước 2: Bấm “Tìm kiếm” 
+Bước 3: Kết quả tìm kiếm sẽ hiển thị tại vùng (4) kết quả Tìm kiếm, vùng (3) mặc định hiển thị chi tiết của bản ghi đầu tiên trong danh sách kết quả 
+Thêm mới
+ 
+Mục đích: 
+Thêm mới thông tin theo từng nghiệp vụ
+Hình 
+5
+: Vị trí nút Thêm mới trên toolbar
+Hiển thị: 
+Chỉ áp dụng cho màn Maker
+Chọn button “Thêm” trên thanh toolbar để chuyển sang chế độ Thêm mới bản ghi.
+Các trường thông tin chi tiết khi thêm mới được hiển thị trên màn hình:
+Các trường bắt buộc nhập ( Text đỏ ) 
+Các trường không cần nhập (bị mờ xám ) 
+Thao tác: 
+Nhập các thông tin hợp lệ bấm “
+Lưu
+”
+ 
+Luồng xử lý
+: 
+Lưu thông tin bản ghi được thêm mới với Trạng thái bản ghi = ‘Chờ duyệt thêm’ 
+Bản ghi mới thêm sẽ hiển thị ở đầu danh sách của Kết quả Tìm kiếm. Thông tin chi tiết sẽ có gạch chân đen tại tất cả các trường thông tin có dữ liệu.
+Cập nhật
+Mục đích: 
+Chỉnh sửa thông tin của bản ghi đã có trong hệ thống 
+Hình 
+6
+: Vị trí nút Lưu trên toolbar
+Hiển thị: 
+Chỉ áp dụng cho màn Maker
+Chỉ cho phép sửa các bản ghi có Trạng thái bản ghi: Chờ duyệt thêm/ Chờ duyệt sửa/ Đã duyệt/ Từ chối
+Thao tác: 
+Chọn bản ghi muốn cập nhật tại Kết quả Tìm kiếm >> Chỉnh sửa thông tin ở vùng Thông tin chi tiết >> bấm “Lưu” trên thanh toolbar
+Luồng xử lý:
+Sửa bản ghi Chờ duyệt thêm/ Chờ duyệt Sửa: Giữ nguyên kết quả tìm kiếm, hệ thống cập nhật và hiển thị bản ghi sửa lên đầu trang.
+Sửa bản ghi Đã duyệt: Trạng thái bản ghi được cập nhật thành ‘Chờ duyệt Sửa’. 
+Sửa bản ghi Từ chối: Cập nhật trạng thái về trạng thái gần nhất trước khi bị từ chối. Ví dụ trạng thái trước đó là Chờ duyệt Sửa --> sau khi checker từ chối trạng thái bản ghi câp nhật thành ‘Từ chối’ --> Maker sửa lại bản ghi này, bấm Lưu, trạng thái bản ghi được cập nhật là ‘Chờ duyệt Sửa’
+Hiển thị sửa: Thông tin thay đổi được gạch chân đỏ và có icon “?”. Di chuột vào icon để xem giá trị trước khi sửa. 
+Hình 
+7
+: Xem giá trị trước khi sửa
+Hủy
+Mục đích: 
+Cho phép Maker/Checker hủy bản ghi chờ duyệt (thêm, sửa, xoá) và nhập lý do hủy (nếu có)
+Hiển thị:
+Tính năng Hủy áp dụng ở cả 2 màn Maker và Checker
+Chỉ cho phép hủy với những bản ghi có Trạng thái bản ghi = Chờ duyệt thêm/ Chờ duyệt Sửa/ Chờ duyệt Xóa/ Từ chối 
+Thao tác:
+ Có 2 cách hủy bản ghi
+Cách 1: Hủy 1 bản ghi bằng button trên toolbar
+Hình 
+8
+: Vị trí nút Hủy trên toolbar
+Chọn bản ghi muốn hủy trên Kết quả Tìm kiếm >> Bấm “Hủy” trên toolbar và chọn “Xác nhận” 
+Cách 2: Hủy 1 hoặc nhiều bản ghi bằng icon trên Kết quả Tìm kiếm
+Hình 
+9
+: Vị trí nút Hủy tại vùng kết quả tìm kiếm
+Tick chọn vào ô checkbox đầu dòng của 1 hoặc nhiều bản ghi muốn hủy 
+( lưu ý: Tất cả các bản ghi được chọn phải thỏa mãn điều kiện Trạng thái bản ghi)
+Bấm icon “x” trên Kết quả Tìm kiếm và chọn xác nhận
+Luồng xử lý
+: 
+Hủy bản ghi Chờ duyệt thêm >> bản ghi sẽ bị xóa khỏi hệ thống 
+Hủy bản ghi Chờ duyệt Sửa/ Từ chối >> hệ thống sẽ lấy lại thông tin và trạng thái của bản ghi trước sửa gần nhất
+Hủy bản ghi Chờ duyệt Xóa >> hệ thống sẽ lấy lại và hiển thị thông tin của bản ghi Đã duyệt trước đó.
+Xóa
+Mục đích: 
+Xóa bản ghi Đã duyệt 
+Hình 
+10
+: Vị trí nút Xóa trên toolbar
+Hiển thị: 
+Tính năng Xóa chỉ áp dụng cho các bản ghi có Trạng thái bản ghi = Đã duyệt
+Chỉ áp dụng cho màn Maker
+Thao tác: 
+Chọn bản ghi muốn xóa >> bấm Xóa
+Luồng xử lý:
+Bản ghi hiển thị trên giao diện với Trạng thái bản ghi = Chờ duyệt Xóa và các thông tin được gạch giữa.
+Nếu Hủy bản ghi Chờ duyệt Xóa, trên giao diện sẽ hiển thị thông tin của bản ghi Đã duyệt trước đó
+Từ chối/ Duyệt
+ 
+Mục đích: 
+Cho phép Checker Duyệt/ Từ chối bản ghi đang chờ duyệt (thêm, sửa, xoá) theo phân quyền và nhập lý do từ chối (nếu có).
+Hiển thị:
+Chỉ áp dụng cho màn Duyệt 
+Tính năng Duyệt/ Từ chối chỉ áp dụng cho các bản ghi có Trạng thái bản ghi = Chờ duyệt thêm/ Chờ duyệt Sửa/ Chờ duyệt Xóa
+Thao tác: 
+Có 2 cách để Duyệt/ Từ chối bản ghi
+Cách 1:
+ 
+Duyệt/ Từ chối 1 bản ghi bằng button “Duyệt/ Từ chối” trên thanh toolbar
+Hình 
+11
+: Vị trí nút duyệt và từ chối trên toolbar
+Bấm vào bản ghi muốn Duyệt/ Từ chối trên Kết quả Tìm kiếm >> Thông tin của bản ghi sẽ hiển thị vùng thông tin chi tiết 
+Bấm “Chấp nhận/ Từ chối”  trên thanh toolbar và chọn “Xác nhận” 
+Cách 2: Duyệt/ Từ chối 1 hoặc nhiều bản ghi bằng icon trên Kết quả Tìm kiếm
+Hình 
+12
+: Vị trí nút duyệt và từ chối trên Tìm kiếm Result
+Tick chọn vào ô checkbox đầu dòng của 1 hoặc nhiều bản ghi muốn Duyệt/ Từ chối ( lưu ý: Tất cả các bản ghi được chọn phải thỏa mãn điều kiện Trạng thái bản ghi)
+Bấm icon “Duyệt/ Từ chối” trên Kết quả Tìm kiếm và chọn xác nhận
+Luồng xử lý: 
+Duyệt:
+Duyệt bản Chờ duyệt thêm/Chờ duyệt Sửa: Cập nhật Trạng thái bản ghi thành Đã duyệt 
+Duyệt bản ghi Chờ duyệt Xóa >> Cập nhật Trạng thái bản ghi thành Xóa, khi xem lại bản ghi thông tin bị gạch giữa
+Từ chối:
+Từ chối bản ghi Chờ duyệt thêm/ Chờ duyệt Sửa >> Cập nhậtTrạng thái bản ghi  = Từ chối
+Từ chối bản ghi Chờ duyệt Xóa >> hệ thống hiển thị trên giao diện bản ghi Đã duyệt trước đó
+Auditrail
+ 
+Mục đích: 
+Tra cứu lại lịch sử thay đổi của bản ghi.
+Hình 
+13
+: Vị trí nút Audit trail trên toolbar
+Hiển thị: 
+Tính năng Auditrail áp dụng ở cả 2 màn Maker và Checker 
+Áp dụng với tất cả các Tìm kiếm
+Thao tác:
+Bấm chọn bản ghi tại Kết quả Tìm kiếm >> bấm button “Auditrail” trên thanh toolbar
+Hiển thị popup “Auditrail” bao gồm:
+Phần thông tin User và Thời gian tạo/cập nhật/Duyệt/Từ chối
+Phần tìm kiếm: thời gian, UserID
+Lịch sử thêm/chỉnh sửa của bản ghi: Có thể bấm vào các icon (-) (+) để thu gọn hoặc xem chi tiết
+Hình 
+14
+: Màn hình Audit trail
+Copy
+Mục đích: 
+Hỗ trợ copy dữ liệu từ bản ghi đã có sẵn để thêm mới bản ghi nhanh hơn
+Hình 
+15
+: Vị trí nút Copy trên toolbar
+Hiển thị:
+Tính năng copy chỉ áp dụng cho màn maker
+Áp dụng với tất cả các Tìm kiếm
+Thao tác:
+Chọn bản ghi muốn Sao chép >> bấm button “Sao chép” trên thanh toolbar >> Màn hình được chuyển sang chế độ Thêm mới
+Chỉnh sửa thông tin các trường khóa chính (không được trùng) >> bấm ‘Lưu”
+Luồng xử lý: 
+Xử lý tương tự như luồng thêm mới 
+Clear
+Mục đích: 
+Xóa tất cả dữ liệu đã nhập ở tính năng Tìm kiếm hoặc thêm
+Hình 
+16
+: Vị trí nút clear trên toolbar
+Hiển thị:
+Tính năng clear áp dụng cho cả 2 màn Maker và Checker
+Chỉ áp dụng ở mode “Tìm kiếm”
+Thao tác:
+ Tại mode Tìm kiếm >> bấm button “Clear” trên thanh toolbar 
+Luồng xử lý:
+ Xóa tất cả tiêu chí đã nhập 
+Refresh
+ 
+Mục đích: 
+Làm mới thông mà không cần thoát khỏi màn hình đang mở
+Hiển thị: 
+Tính năng Refresh áp dụng cho cả 2 màn Maker và Checker
+Thao tác:
+Bấm button “Refresh” trên toolbar
+Luồng xử lý:
+ Hệ thống làm mới lại thông tin ở Kết quả Tìm kiếm và trên vùng xem chi tiết
+Kết quả tìm kiếm
+Mục đích: 
+Hiển thị danh sách thông tin/ giao dịch của màn hình nghiệp vụ. 
+Chọn bản ghi để xem chi tiết, sửa
+Chọn bản ghi để Duyệt, Từ chối, Hủy, Xóa
+Cấu hình tùy chọn hiển thị cột theo nhu cầu của từng user
+Kết xuất danh sách thông tin
+Màn hình
+Màn hình dành cho Maker
+Màn hình dành cho Checker:
+(1): Di chuột vào biểu tượng này, User có thể tùy chỉnh hiển thị chế độ và size vùng Kết quả tìm kiếm
+: hiển thị Vùng Kết quả tìm kiếm full màn hình
+: hiển thị Vùng Kết quả tìm kiếm dọc bên phải màn hình
+: hiển thị Vùng Kết quả tìm kiếm ngang phía dưới màn hình
+(2): Thu gọn để thu gọn hoặc mở Vùng Kết quả tìm kiếm
+(3): Chọn hiển thị số bản ghi trên một trang (10, 20, 50, 100)
+(4): Cấu hình lại cột hiển thị và thứ tự hiển thị cột trong danh sách. Hệ thống sẽ lưu lại cấu hình mới nhất cho tới khi User cấu hình lại (xem hướng dẫn chi tiết ở bên dưới)
+(5): Kết xuất danh sách thông tin theo định dạng excel về máy tính của user
+(6): Di chuyển tới các trang dữ liệu
+(7): Cụm chức năng Duyệt/Từ chối/ Hủy nhiều bản ghi cùng một lúc dành cho màn hình của Checker 
+Hướng dẫn chức năng Cấu hình
+(1): Vùng các cột đang hiển thị trên danh sách vùng Kết quả tìm kiếm
+(2): Vùng các cột đang và muốn ẩn (không) hiển thị trên danh sách vùng Kết quả tìm kiếm
+(3): Dùng để di chuyển các cột đang hiển thị sang vùng ẩn hiển thị. Tick chọn cột thông tin vào ô checkbox và bấm (3), thao tác này di chuyển 1/nhiều cột cùng một lúc. Hoặc User di chuyển chuột trái đến cột cần thao tác, giữ chuột trái và kéo sang vùng (2), thao tác này chỉ di chuyển từng cột.
+(4): Dùng để di chuyển các cột đang ẩn sang vùng hiển thị. Thao tác thực hiện giống (3)
+(5): Đưa cấu hình về cài đặt mặc định của hệ thống
+(6): Đóng màn hình cấu hình
+(7): Chấp nhận và lưu cấu hình mới tại máy tính của user. Cấu hình này chỉ thay đổi khi user thực hiện cấu hình lại.
+Tìm kiếm nhanh chức năng
+Mục đích
+Tìm kiếm nhanh màn hình nghiệp vụ cần thao tác thay vì vào thanh menu để tìm
+Thao tác
+Bước 1: chuột vào vùng nhập
+Bước 2: Nhập mã hoặc tên chức năng (ví dụ nhập giá trị ‘nộp’ hệ thống sẽ liệt kê tất cả chức năng có từ nộp)
+Bước 3: Bấm chọn chức năng cần thao tác
+Các dạng thông báo của hệ thống
+Mục đích: 
+Hiển thị cảnh báo, thông báo cho user 
+Màn hình
+Thông báo khi bấm Lưu: có một số thông báo hệ thống sẽ hiển thị ngày dưới trường thônng tin bị lỗi với nội dung lỗi cụ thể:
+Thông báo Cảnh báo khi bấm Lưu:
+(người dùng có thể nhập ghi chú vào ô trống bên dưới)
+Thông báo lỗi khi bấm Lưu:
+Thông báo Lưu thành công:
+Thông báo tại màn của Checker: khi Maker Lưu thành công giao dịch
+Thông báo tại màn hình Maker: khi Checker duyệt thành công  hoặc Từ chối
+KHách hàng (cLIENT)
+Mục đích
+Chức năng này quản lý và lưu trữ thông tin khách hàng.
+Màn hình và các trường dữ liệu
+Đường dẫn:
+Maker
+: 
+Quản lý k
+hách hàng > Khách hàng
+ (
+Client Management>Client)
+Checker
+: 
+Quản lý khách hàng > 
+Approval > 
+Khách hàng
+ (Chờ duyệt) (
+Client Management>
+Approval >Client (Approval)
+)
+Màn hình:
+Các trường dữ liệu: 
+STT
+Tên VN
+Tên EN
+Kiểu dữ liệu
+Bắt buộc
+Chỉnh sửa
+Mô tả
+Mã khách hàng
+ClientID
+Text
+Có
+Không
+User nhập mã ClientID & hệ thống báo lỗi nếu trùng với ClientID đã tồn tại 
+trong hệ thống 
+hoặc sai định dạng. 
+Client ID gồm 6 
+ký tự, chỉ cho phép nhập Số
+Hỗ trợ icon dấu # để tự động sinh ClientID theo quy tắc lấy giá trị nhỏ nhất chưa tồn tại
+Tên khách hàng
+Name
+Text
+Có
+Có
+Tên khách hàng
+Tên KH (Ngôn ngữ khác)
+Name (Other Language)
+Text
+Không
+Có
+Tên bằng ngôn ngữ khác
+Tab Thông tin chung (General information)
+Thông tin khách hàng (Client base information)
+Loại hình khách hàng
+Registration Type
+Droplist
+Có
+Có
+Chọn 1 trong các Loại hình khách hàng sau 
+(Loại hình khách hàng được khai báo tại màn SystemCode):
+- Cá nhân trong nước (Local Retail)
+- Cá nhân nước ngoài (Foreign Retail)
+- Tổ chức trong nước (Local Institutional) 
+- Tổ chức nước ngoài (Foreign Institution)
+Loại ĐKSH
+ID Type
+Drop list
+Có
+Có
+Chọn 1 trong các Loại ĐKSH sau (Loại ĐKSH được khai báo tại màn SystemCode):
+- Chứng minh thư (Identity Card)
+- Căn cước công dân (Citizen ID) (mặc định)
+- Căn cước (Citizen ID (New)) 
+- Giấy phép đăng ký kinh doanh (Business Registration Certificate)
+- Giấy tờ khác (Other ID)
+- Hộ chiếu (Passport)
+- Cơ quan Chính phủ
+Nếu 
+Loại hình khách hàng là Cá nhân trong nước thì Loại ĐKSH chỉ hiển thị: Chứng minh thư, Căn cước công dân, 
+Căn cước, 
+Hộ chiếu, Cơ quan Chính phủ, Giấy tờ khác.
+Nếu Loại hình khách hàng là Cá nhân nước ngoài thì Loại ĐKSH chỉ hiển thị: Hộ chiếu, Giấy tờ khác.
+Nếu Loại hình khách hàng là Tổ chức trong nước/Tổ chức nước ngoài thì Loại ĐKSH chỉ hiển thị: Giấy phép đăng ký kinh doanh, Cơ quan Chính phủ, Giấy tờ khác.
+ 
+Số ĐKSH
+ID Number
+Text
+Có
+Có
+Nếu [IDType] là Chứng minh thư nhân dân hoặc Căn cước công dân hoặc Căn cước: cho khai báo không giới hạn do quy định số có thể thay đổi.. 
+Các [lDType] khác, được gõ ký tự đặc biệt.
+Ngày cấp
+ID Issue Date
+Date
+(dd/mm/yyyy)
+Có
+Có
+Ngày cấp phải < = Ngày hiện tại
+Nếu [IDType] = ‘Căn cước’: Ngày cấp phải >=1/7/2024.
+ 
+Ngày hết hạn
+ID Expiry Date
+Date
+(dd/mm/yyyy)
+Tùy chọn
+Có
+Bắt buộc nhập khi ID Type là ‘Passport’ với Loại hình khách hàng là ‘Cá nhân nước ngoài’.
+Bắt buộc nhập khi ID Type là “Căn cước”, “Căn cước công dân”, “Chứng minh nhân dân” với khách hàng là ‘Cá nhân trong nước”
+Với IDType là “Chứng minh nhân dân, hệ thống tự động tính ngày hết hạn = Ngày cấp + 15 năm. 
+Không cho phép nhập Ngày hết hạn < Ngày cấp.
+Nơi cấp
+ID Issue Place
+ Text
+Có
+Có
+- Nơi cấp Loại ĐKSH
+- Hỗ trợ gợi ý các giá trị: Bộ Công an, CCS Quản lý hành chính về TTXH, Cục CS
+Quốc tịch
+Nationality
+Drop list
+Có
+Có
+Mặc định: Việt Nam.
+Trong trường hợp KH trong nước thì Quốc tịch mặc định là Việt Nam và không cho sửa.  
+Đối với KHNN: Hệ thống không mặc định giá trị nào, để user tự chọn giá trị phù hợp.
+Chữ ký
+Signature file
+File ảnh
+Không
+Có
+- 
+Cho phép tải nhiều ảnh chữ ký với tất cả các định dạng: jped, jpg, png... 
+- Hiển thị thông tin dạng ảnh thu nhỏ trên màn hình view để người dùng có thể kiểm tra nhanh – kích thước 120px x 120px. Người dùng hover vào ảnh để lựa chọn xem/xóa ảnh.
+Loại tổ chức
+Institution Type
+Drop list
+Tùy chọn
+Có
+- 
+Chỉ hiển thị khi loại hình KH là “Tổ chức trong nước” hoặc “Tổ chức nước ngoài” và bắt buộc chọn thông tin này.
+- Danh sách giá trị: Tham chiếu bảng danh sách loại tổ chức bên dưới.
+Investor code
+Investor code
+Text
+Tùy chọn
+Có
+- 
+Mã nhà đầu tư
+ do VSD cấp
+- 
+Bắt buộc nhập trường này
+ với KH nước ngoài
+Thông tin khác (Other information)
+Giới tính
+Gender
+Drop list
+Tùy chọn
+Có
+- Gồm 3 giá trị:
++ Nam (Male)
++ Nữ (Female)
++ Khác (Other)
+-  Enable và bắt buộc nhập với Loại hình khách hàng cá nhân, 
+- Disable với các Loại hình khách hàng khác
+Ngày sinh
+Date of Birth
+Date (dd/mm/yyyy)
+Tùy chọn
+Có
+- 
+Tuổi của KH được tính = Ngày hiện tại – Ngày sinh.
+- Với KH cá nhân: bắt buộc nhập, báo lỗi nếu KH chưa đủ 18 tuổi.
+- KH tổ chức
+: K bắt buộc
+Nơi sinh
+Place of Birth
+Drop list
+Không
+Có
+- 
+Hiển thị danh sách quốc gia.
+- 
+Không bắt buộc nhập với tất cả các loại khách hàng.
+Quốc gia
+Resident Country
+Drop list
+Không
+Có
+Với KH trong nước, mặc định là Việt Nam và cho sửa. Các trường hợp khác người dùng tuỳ chọn.
+FATCA
+FATCA
+Checkbox
+Không
+Có
+Trường đánh dấu NĐT có dấu hiệu Hoa Kỳ. 
+- 
+Hệ 
+thống tự động tick “FATCA” (cho phép untick) nếu có các trường thông tin:
++ Quốc tịch = ‘UNITED STATES’
++ Địa chỉ liên lạc/địa chỉ thường trú có chứa ‘USA’, or ‘United State’, or ‘America’ k phân biệt chữ hoa thường/dấu cách
++ Hệ thống
+ có cảnh báo cho người dùng khi khách hàng mới có tick FATCA
+Số TK lưu ký
+Custody ID
+Text
+Có
+Có
+Nguyên tắc sinh Custody ID:
+- Loại hình khách hàng trong nước: 003C + ClientID
+- Loại hình khách hàng nước ngoài: 003F + ClientID
+Trạng thái khách hàng (Customer status)
+Nhân viên công ty
+Related Staff 
+Checkbox
+Không
+Có 
+Nhân viên công ty.
+Kênh mở TK 
+Creation Method 
+Drop list
+Không
+Có 
+Chọn một trong các giá trị sau: 
++ Tại quầy
++ EKYC (Website, App...)
++ Qua môi giới
+Khi mở tài khoản trên Client: Mặc định là Tại quầy.
+Với các tài khoản nhận từ API: hệ thống mặc định lấy theo kênh API gửi về.
+Ngày mở
+Open Date
+Date
+(dd/mm/yyyy)
+Không
+Không
+Lấy theo ngày GD được duyệt thành công
+Ngày đóng
+Close Date
+Date
+(dd/mm/yyyy)
+Không
+Không
+Được cập nhật theo ngày Checker duyệt đóng Client.
+Trạng thái
+Status
+Drop list
+Có
+Có
+Trạng thái khách hàng gồm:
+Hoạt động (Mặc định khi thêm mới
+ và disable
+)
+Đóng: Người dùng chủ động thực hiện chọn trạng thái này sau khi đã đóng tất cả các tài khoản của Client này trên hệ thống. Nếu tồn tại tài khoản của Client này chưa đóng hệ thống hiện 
+thông báo “This customer still has an unclosed account!” và không cho phép lưu bản ghi.
+Suspend: Cho phép thay đổi trạng thái từ Normal sang Suspend và ngược lại. Khi trạng thái Client thay đổi, hệ thống tự động cập nhật tất cả các trạng thái của tài khoản theo.
+Diễn giải
+Remark
+Textx
+Không
+Có
+Thông tin bổ sung (nếu có).
+Tab Liên hệ (Contact)
+Yêu cầu:
+Bắt buộc nhập các thông tin mặc định (Số điện thoại, Địa chỉ liên lạc
+, Email
+).
+Có thể thêm nhiều thông tin (Địa chỉ, Số điện thoại, Email, Fax) khác và có thể sửa/xoá thông tin liên hệ.
+Contact info
+Loại liên hệ
+Contact Type
+Drop list
+Có
+Có
+Chọn một trong các giá trị sau:
+Địa chỉ: Bắt buộc nhập ít nhất 1 thông tin
+Số điện thoại: Bắt buộc nhập ít nhất 1 số điện thoại.
+Email: Trường hợp user không khai báo email nào hệ thống hiển cảnh báo “Tab liên hệ chưa khai báo thông tin email!” và vẫn cho save nếu user chọn tiếp tục save.
+FAX
+Loại thông tin
+Infor Type
+Drop list
+Bắt buộc
+Có
+Nếu chọn Loại liên hệ = ‘Địa chỉ’. Hệ thống hiển thị và chỉ cho phép chọn 1 trong các giá trị:
+Địa chỉ thường trú/trụ sở
+ (Permanent address/Headquarters)
+Địa chỉ liên lạc
+ (Contact address)
+Địa chỉ hóa đơn (
+Billing address
+)
+Nếu chọn loại liên hệ = ’Số điện thoại’. Hệ thống hiển thị và chỉ cho phép chọn 1 trong các giá trị:
+Home Tel (Số điện thoại nhà)
+Office Tel (Số điện thoại công ty)
+Mobile Tel (Số điện thoại di động)
+Giá trị
+Detail Info
+Text
+Có
+Có
+- 
+Nếu loại liên hệ là địa chỉ:
++ 
+Yêu cầu nhập tối thiểu > 15 ký tự và không có ký tự đặc biệt.
++ 
+Nếu Loại thông tin = ‘Địa chỉ hóa đơn’, giá trị hiển thị mặc định là địa chỉ thường trú đã khai báo và cho phép sửa.
+- 
+Nếu loại liên hệ là Số điện thoại/Fax cho phép nhập ký tự + số
+- 
+Nếu loại liên hệ là email, email phải nhập đúng định dạng example@domain
+Quốc gia
+Resident country
+Drop list
+Không
+Có
+Hiển thị khi chọn loại liên hệ = ‘Địa chỉ’ 
+Fax attention
+Fax Attention
+Text
+Không
+Có
+Hiển thị khi chọn loại liên hệ = ‘Fax’
+M
+ặc định
+Default
+Checkbox
+Không
+Có
+- 
+Tick chọn nếu muốn đặt thông tin liên hệ là mặc định. Mỗi loại liên hệ chỉ được chọn 1 giá trị mặc định.
+- 
+Trường hợp KH muốn đổi thông tin mặc định, tick chọn vào giá trị muốn thay đổi:
++ 
+Hệ thống hiển thị yêu cầu xác nhận đổi thông tin mặc định, nếu xác nhận hệ thống tự động untick giá trị mặc định cũ và tick giá trị mặc định mới.
+Danh sách liên hệ
+ (C
+ontact list
+)
+: 
+Hiển thị theo mockup
+Button
+Nút 
+Thêm/Cập nhật/
+Sửa/Xoá
+Add/Update/Edit
+/
+Delete
+Button
+/Icon
+Có
+Có
+Tính năng để Lưu dữ liệu/Sửa/
+Yêu cầu sửa/
+Xóa thông tin liên hệ. 
+Nút Save: 
+Lưu dữ liệu user đã nhập ở vùng “Contact Information”, load lại dữ liệu tại gridview “
+Additional Contact list
+”.
+Clear lại các trường thông tin vùng “Contact Information” để user có thể nhập thông tin liên hệ mới.
+Nút Edit: Hiển thị dữ liệu chi tiết tương ứng dòng được chọn trong gridview “Contact 
+List” vào vùng “Contact Information” để user có thể chỉnh sửa thông tin.
+Nút Update: Ghi nhận update dữ liệu sau khi Edit
+Nút Xóa: Xóa dòng tương ứng được chọn trong gridview “Contact List”.
+Yêu cầu nghiệp vụ
+- Yêu cầu giao diện
+:
++ Khi đổi ngôn ngữ từ TA -> TV hoặc ngược lại, tên trường/giá trị trong các trường droplist cần được đổi ngôn ngữ ngay lập tức mà không cần reload lại trang
++ Các trường droplist hiển thị nội dung tiếng anh/tiếng việt theo ngôn ngữ hệ thống, không hiển thị ID (Ví dụ: mã quốc gia là VN, diễn giải tiếng việt là: Việt Nam, diễn giải tiếng anh là: Viet Nam 
+ hiển thị lên giao diện là Việt Nam/Viet Nam)
++ Các trường bắt buộc yêu cầu chữ màu đỏ, nếu k nhập thì báo lỗi bên dưới trường: Must not be empty/Không được để trống, khi bấm Lưu sẽ bắn thông báo lỗi 
+(“Tên trường TV” must not by empty/ “Tên trường EN” không được để trống 
+và focus vào ô dữ liệu lỗi đầu tiên
++ Các trường dạng Textbox yêu cầu check length 
+(dựa theo tài liệu thiết kế Database) 
+và hiển thị số ký tự đã nhập/maxlength, không được phép nhập vượt maxlength
++ Các quy chuẩn thông báo, các thông tin khác xem tại 
+Phần Giao diện chung
+Mã YC
+Yêu cầu
+Mô tả yêu cầu
+Thêm mới
+Maker bấm nút ‘Lưu’
+Hệ thống 
+kiểm tra tính hợp lệ của
+ các trường thông tin bắt buộc và yêu cầu nhập đúng định dạng quy định và ràng buộc tại từng trường đã mô tả
+ ở trên.
+Hệ thống kiểm tra KH đủ 18 tuổi chưa, nếu chưa đủ 18 tuổi thì báo lỗi.
+Bắt buộc có ít nhất 1 dữ liệu tại mỗi thông tin: Số điện thoại, địa chỉ
+Hệ thống chấp nhận với (Mã khách hàng, Số tài khoản lưu ký) chưa tồn tại trong hệ thống
+.
+Hệ thống kiểm tra Số ĐKSH (CMT/CCCD) đã tồn tại trong hệ thống chưa, nếu trùng báo lỗi
+.
+Hệ thống kiểm tra SĐT/Email của KH nếu trùng với SĐT/Email của Client đang hoạt động trên hệ thống (Client có Status <> ‘Closed’): Hiện cảnh báo cho user biết trùng với ClientID, user xác nhận Yes vẫn cho thực hiện tiếp.
+Hiển thị trên giao diện: 
+[Trạng thái bản ghi] = ”
+Pending Insert”
+ (Chờ duyệt thêm)
+Từ chối
+Checker chọn yêu cầu thêm mới có trạng thái ‘Pending Insert’ --> Bấm nút ‘Rejected’
+Hệ thống kiểm tra yêu cầu thêm mới đang có trạng thái ‘
+Pending Insert
+’ và hiển thị màn hình để nhập lý do từ chối (bắt buộc).
+Hiển thị trên giao diện: Trạng thái bản ghi ‘Rejected’.
+Checker chọn yêu cầu thay đổi thông tin có trạng thái ‘Pending update’ --> Bấm nút ‘Rejected’
+Hệ thống kiểm tra yêu cầu thay đổi thông tin đang có trạng thái ‘
+Pending update
+’ và hiển thị màn hình để nhập lý do từ chối (bắt buộc)
+Hiển thị trên giao diện: Trạng thái bản ghi ‘Rejected’.
+Sửa
+Maker chọn khách hàng có trạng thái ‘Pending Insert’
+/ ‘Reject
+ed
+’
+ 
+(của Pending Insert)
+ --> Sửa thông tin --> Bấm ‘Lưu’
+Hệ thống kiểm tra các điều kiện đã nêu ở BR1, nếu thỏa mãn cập nhật thông tin thay đổi mới.
+Hiển thị trên giao diện: 
+[Trạng thái bản ghi]=
+ “
+Pending Insert”.
+Maker chọn khách hàng có trạng thái ‘Rejected
+ (của Pending Update)
+/
+ 
+Pending 
+Update’
+/ Active
+ --> Sửa thông tin --> Bấm ‘Lưu’
+Hệ thống kiểm tra các điều kiện đã nêu ở BR1, nếu thỏa mãn cập nhật thông tin mới thay đổi.
+Hiển thị trên giao diện: 
+[Trạng thái bản ghi]=
+ “
+Pending Update”.
+Duyệt
+Checker: Duyệt thêm mới khách hàng
+Hệ thống kiểm tra lại các điều kiện validate, ràng buộc, yêu cầu nghiệp vụ tương tự như tại bước Maker tạo giao dịch. Hệ thống hiển thị thông báo/ cảnh báo lỗi nếu không thỏa mãn điều kiện.
+Hệ thống cập nhật trạng thái khách hàng là Hoạt động (
+Normal
+).
+Hiển thị trên giao diện: [Trạng thái bản ghi]= 
+‘
+Active’ (Đã duyệt)
+Checker: Duyệt thay đổi thông tin khách hàng
+Hệ thống kiểm tra lại các điều kiện validate, ràng buộc, yêu cầu nghiệp vụ tương tự như tại bước Maker tạo giao dịch. Hệ thống hiển thị thông báo/ cảnh báo lỗi nếu không thỏa mãn điều kiện.
+Hệ thống cập nhật thông tin thay đổi mới cho khách hàng.
+Hiển thị trên giao diện: [Trạng thái bản ghi]= 
+‘Active’ (Đã duyệt)
+Checker: Duyệt xóa thông tin khách hàng
+Hệ thống xóa thông tin khách 
+hàng
+Hiển thị trên giao diện: [Trạng thái bản ghi]= 
+‘
+Deleted
+’ (Xóa)
+.
+Hủy
+Maker chọn yêu cầu thêm mới/thay đổi/xóa thông tin có trạng thái ‘Pending Insert/Pending update/Pending
+ 
+delete’ --> Bấm nút ‘Hủy’
+Hệ thống kiểm tra yêu cầu thêm mới/thay đổi thông tin đang có trạng thái ‘
+Pending
+ Insert/
+Pending
+ 
+U
+pdate
+/Pending 
+D
+elete
+’.
+Xử lý
+:
+TH Hủy bản ghi Pending Insert: Xóa luôn bản ghi khỏi hệ thống.
+TH Hủy bản ghi Pending Update/Pending Delete: Trả lại dữ liệu bản ghi đã duyệt gần nhất trước đó.
+ Hiển thị trên giao diện: [Trạng thái bản ghi]= ‘Active’ (Đã duyệt)
+Xóa
+Maker: Xóa khách hàng
+Cho phép xoá với bản ghi có trạng thái 
+Đã duyệt (Active)
+.
+Hiển thị trên giao diện: [Trạng thái bản ghi]=  
+‘
+Pending Delete
+’
+ (Chờ duyệt xóa)
+Tìm kiếm
+Maker/Checker: Tìm kiếm thông tin khách hàng
+Xem mô tả ở 
+Phần Giao diện chung
+Kết xuất
+Maker/Checker: Kết xuất thông tin khách hàng
+Xem mô tả ở 
+Phần Giao diện chung
+Import và Tải mẫu
+Maker/Checker: Tải mẫu và Import thông tin từ file
+Xem mô tả ở 
+Phần Giao diện chung
+Hệ thống hỗ trợ Import thông tin từ file để: Thêm mới 
+thông tin, 
+hệ thống check theo BR1.
+Template: 
+Import.Client
+Danh sách loại hình tổ chức (Institution Type)
+STT
+Loại hình 
+Khách hàng
+ID
+Tên tiếng việt
+Tên tiếng anh
+Nước ngoài
+FOREIGN_BRANCH_OF_A_FOREIGN_FUND_ASSET_MANAGEMENT_COMPANY
+Chi nhánh công ty quản lý quỹ (tài sản) nước ngoài
+Branch of a foreign fund (asset) management company (Foreign)
+Nước ngoài
+FOREIGN_BROKER_FIRM_FUTURE_COMMISION_MERCHANT
+Công ty chứng khoán / công ty kinh doanh hợp đồng tương lai nước ngoài
+Broker firm / futures commission merchant (Foreign)
+Nước ngoài
+FOREIGN_CLOSED_END_FUND
+Quỹ đóng nước ngoài
+Closed-ended fund (Foreign)
+Nước ngoài
+FOREIGN_COMMERCIAL_MERCHANT_BANK
+Ngân hàng thương mại / ngân hàng đầu tư nước ngoài
+Commercial / merchant bank (Foreign)
+Nước ngoài
+FOREIGN_CUSTODIAN_BANK
+Ngân hàng lưu ký nước ngoài
+Custodian bank (Foreign)
+Nước ngoài
+FOREIGN_DEVELOPMENT_ASSISTANCE_FUND
+Quỹ hỗ trợ phát triển nước ngoài
+Development Assistance Fund (Foreign)
+Nước ngoài
+FOREIGN_DISCRETIONARY_ACCOUNT_FUND
+Quỹ ủy thác đầu tư nước ngoài
+Discretionary account fund (Foreign)
+Nước ngoài
+FOREIGN_ETF_FUND_INDEX_FUND
+Quỹ hoán đổi danh mục (ETF) / Quỹ chỉ số nước ngoài
+ETF fund / Index Fund (Foreign)
+Nước ngoài
+FOREIGN_FUND_ASSET_MANAGEMENT_COMPANY
+Công ty quản lý quỹ (tài sản) nước ngoài
+Fund (asset) management company (Foreign)
+Nước ngoài
+FOREIGN_FUND_ESTABLISHED_AS_A_CORPORATION
+Quỹ đầu tư thành lập dưới hình thức công ty nước ngoài
+Fund established as a corporation (Foreign)
+Nước ngoài
+FOREIGN_INSURANCE_COMPANY
+Công ty bảo hiểm nước ngoài
+Insurance company (Foreign)
+Nước ngoài
+FOREIGN_INVESTMENT_BANK
+Ngân hàng đầu tư nước ngoài
+Investment bank (Foreign)
+Nước ngoài
+FOREIGN_MUTUAL_FUND_OPEN_ENDED_FUND
+Quỹ mở / Quỹ tương hỗ nước ngoài
+Mutual fund / Open-ended fund (Foreign)
+Nước ngoài
+FOREIGN_NOT_AVAILABLE
+Không xác định (tổ chức nước ngoài)
+Not available (Foreign)
+Nước ngoài
+FOREIGN_OTHER_FUNDS
+Quỹ khác nước ngoài
+Other funds (Foreign)
+Nước ngoài
+FOREIGN_OTHERS
+Tổ chức khác nước ngoài
+Others (Foreign)
+Nước ngoài
+FOREIGN_PENSION_FUND
+Quỹ hưu trí nước ngoài
+Pension Fund (Foreign)
+Nước ngoài
+FOREIGN_TRUST_FUND_A_CONTRACTUAL_FUND
+Quỹ tín thác / Quỹ hợp đồng nước ngoài
+Trust fund, a contractual fund (Foreign)
+Nước ngoài
+FOREIGN_FUND_ESTABLISHED_AS_A_PARTNERSHIP
+Quỹ đầu tư thành lập dưới hình thức hợp danh nước ngoài
+Fund established as a partnership (Foreign)
+Trong nước
+DOMESTIC_BRANCH_OF_A_DOMESTIC_FUND_ASSET_MANAGEMENT_COMPANY
+Chi nhánh công ty quản lý quỹ (tài sản) trong nước
+Branch of a domestic fund (asset) management company (Domestic)
+Trong nước
+DOMESTIC_BROKER_FIRM_FUTURE_COMMISION_MERCHANT
+Công ty chứng khoán / công ty kinh doanh hợp đồng tương lai trong nước
+Broker firm / futures commission merchant (Domestic)
+Trong nước
+DOMESTIC_CLOSED_END_FUND
+Quỹ đóng trong nước
+Closed-ended fund (Domestic)
+Trong nước
+DOMESTIC_COMMERCIAL_MERCHANT_BANK
+Ngân hàng thương mại / ngân hàng đầu tư trong nước
+Commercial / merchant bank (Domestic)
+Trong nước
+DOMESTIC_CUSTODIAN_BANK
+Ngân hàng lưu ký trong nước
+Custodian bank (Domestic)
+Trong nước
+DOMESTIC_DEVELOPMENT_ASSISTANCE_FUND
+Quỹ hỗ trợ phát triển trong nước
+Development Assistance Fund (Domestic)
+Trong nước
+DOMESTIC_DISCRETIONARY_ACCOUNT_FUND
+Quỹ ủy thác đầu tư trong nước
+Discretionary account fund (Domestic)
+Trong nước
+DOMESTIC_ETF_FUND_INDEX_FUND
+Quỹ hoán đổi danh mục (ETF) / Quỹ chỉ số trong nước
+ETF fund / Index Fund (Domestic)
+Trong nước
+DOMESTIC_FUND_ASSET_MANAGEMENT_COMPANY
+Công ty quản lý quỹ (tài sản) trong nước
+Fund (asset) management company (Domestic)
+Trong nước
+DOMESTIC_FUND_ESTABLISHED_AS_A_CORPORATION
+Quỹ đầu tư thành lập dưới hình thức công ty trong nước
+Fund established as a corporation (Domestic)
+Trong nước
+DOMESTIC_FUND_ESTABLISHED_AS_A_PARTNERSHIP
+Quỹ đầu tư thành lập dưới hình thức hợp danh trong nước
+Fund established as a partnership (Domestic)
+Trong nước
+DOMESTIC_INSURANCE_COMPANY
+Công ty bảo hiểm trong nước
+Insurance company (Domestic)
+Trong nước
+DOMESTIC_INVESTMENT_BANK
+Ngân hàng đầu tư trong nước
+Investment bank (Domestic)
+Trong nước
+DOMESTIC_MUTUAL_FUND_OPEN_ENDED_FUND
+Quỹ mở / Quỹ tương hỗ trong nước
+Mutual fund / Open-ended fund (Domestic)
+Trong nước
+DOMESTIC_OTHERS
+Tổ chức khác
+Others
+Trong nước
+DOMESTIC_PENSION_FUND
+Quỹ hưu trí trong nước
+Pension Fund (Domestic)
+Trong nước
+DOMESTIC_TRUST_FUND_A_CONTRACTUAL_FUND
+Quỹ tín thác / Quỹ hợp đồng trong nước
+Trust fund, a contractual fund (Domestic)
+Trong nước
+PORTFOLIO
+Tổ chức tự doanh trong nước
+Domestic proprietary trading institution
+Trong nước
+PORTFOLIO_FR
+Tổ chức tự doanh nước ngoài
+Foreign proprietary trading institution
+Màn hình Login
+Mục đích
+:
+Màn hình đăng nhập
+ dành cho CBNV đăng nhập vào hệ thống BO, hỗ trợ tính năng Ghi nhớ mật khẩu
+Màn hình và các trường dữ liệu
+Màn hình:
+Các trường dữ liệu:
+STT
+Tên VN
+Tên EN
+Kiểu dữ liệu
+Bắt buộc
+Chỉnh sửa
+Mô tả
+Tài khoản
+User Id
+Text
+Có
+Có
+UserId nhập không phân biệt chữ hoa chữ thường
+Nhập đúng User tồn tại trong hệ thống
+C
+ó icon user bên trái
+Tên VN – Tên EN chính là PlaceHolder
+Mật khẩu
+Password
+Text
+Có
+Có
+Mật khẩu người dùng
+Có icon khóa, có icon eye/eye-slash để hiển thị/ẩn mật khẩu.
+ 
+Khi nhấn icon eye → chuyển đổi hiển thị mật khẩu
+Tên VN – Tên EN chính là PlaceHolder
+Ghi nhớ mật khẩu
+Remember password
+Checkbox
+Không
+Có
+Mặc định: không 
+chọn
+Đăng nhập
+Log
+ 
+in
+Botton
+Mặc định: Disable
+Sau khi nhập đủ thông tin 2 trường 
+User Id 
+và 
+P
+assword sẽ 
+Enable cho phép bấm
+Yêu cầu nghiệp vụ
+ 
+Mã YC
+Yêu cầu
+Mô tả yêu cầu
+Đăng nhập
+Người dùng
+ bấm nút ‘
+Đăng nhập’
+- 
+Hệ thống kiểm tra tính hợp
+ lệ của userId
+ (tồn tại trong hệ thống)
+, password
+. Nếu không hợp lệ thông báo lỗi chi tiết.
+- 
+Password yêu cầu:
++ Tối thiểu 8 ký tự, tối đa 20 ký tự
++ 
+Không được trùng với tên đăng nhập
++ 
+Không dùng chuỗi tuần tự
++ Không dùng tiếng việt, khoảng cách
++ Bao gồm ít nhất 1 ký tự viết hoa, 1 ký tự viết thường, 1 ký tự số, 1 ký tự đặc biệt. Ký tự đặc biệt cho phép: 
+! @ # $ % ^ & * ( ) _ + - = { } [ ] : ; , . ? /
+Người dùng
+ bấm nút ‘
+Ghi nhớ đăng nhập’
+Nếu có chọn thì sau khi đăng nhập lưu lại User Name và password và có gợi ý cho lần đăng nhập tiếp theo
+.
+giao diện minh họa màn hình
+ CLIENT
+Khai báo 
+thông tin cơ bản
+Tab 
+Thông tin KH
+- Mục Thông tin KH 
+>>
+ KH là T
+ổ chức
+- Mục Thông tin KH 
+>>
+ KH là C
+á nhân
+- Mục Thông tin khác:
+- Mục Trạng thái
+Tab 
+Liên hệ
+- 
+Loại liên hệ = 
+Fax
+- 
+Loại liên hệ = 
+Địa chỉ
+Màn hình Đăng nhập:
