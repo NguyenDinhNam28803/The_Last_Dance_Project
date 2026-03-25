@@ -58,7 +58,7 @@
     <!-- RIGHT PANEL: GRID -->
     <div class="grid-panel" :class="{ collapsed: isGridCollapsed }">
       <div class="grid-panel-header">
-        <span><i class="fas fa-users"></i> TÀI KHOẢN ({{ users.length }})</span>
+        <span><i class="fas fa-users"></i> TÀI KHOẢN ({{ userStore.users.length }})</span>
         <button class="btn btn-outline" style="padding: 0 10px;" @click="isGridCollapsed = !isGridCollapsed" title="Đóng/Mở lưới">
           <i class="fas" :class="isGridCollapsed ? 'fa-chevron-left' : 'fa-chevron-right'"></i>
           <span v-if="!isGridCollapsed" style="margin-left:5px">Thu gọn</span>
@@ -66,13 +66,14 @@
       </div>
       
       <div class="grid-content">
-        <table class="grid-table">
+        <div v-if="userStore.loading" class="text-center p-3">Đang tải...</div>
+        <table v-else class="grid-table">
           <thead>
             <tr>
               <th width="40">
                 <input type="checkbox" 
-                  :checked="users.length > 0 && selectedIds.length === users.length" 
-                  @change="e => selectedIds = e.target.checked ? users.map(u => u.custId) : []" 
+                  :checked="userStore.users.length > 0 && selectedIds.length === userStore.users.length" 
+                  @change="e => selectedIds = e.target.checked ? userStore.users.map(u => u.custId) : []" 
                 />
               </th>
               <th>Username</th>
@@ -83,7 +84,7 @@
           </thead>
           <tbody>
             <tr 
-              v-for="user in users" 
+              v-for="user in userStore.users" 
               :key="user.custId"
               :class="{ active: selectedUser?.custId === user.custId }"
               @click="selectUser(user)"
@@ -104,15 +105,20 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import Toolbar from '@/components/common/Toolbar.vue'
 import ValidationInput from '@/components/common/ValidationInput.vue'
-import { mockUsers } from '@/data/mockData'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
+
+onMounted(() => {
+  userStore.fetchAll()
+})
 
 const isGridCollapsed = ref(false)
 const mode = ref('view') // 'view', 'add', 'edit'
 
-const users = ref(mockUsers)
 const selectedUser = ref(null)
 const selectedIds = ref([])
 
@@ -131,7 +137,7 @@ const toolbarFeatures = computed(() => {
   return features
 })
 
-const handleToolbarAction = (action) => {
+const handleToolbarAction = async (action) => {
   if (action === 'add') {
     mode.value = 'add'
     selectedUser.value = null
@@ -146,13 +152,18 @@ const handleToolbarAction = (action) => {
     else alert('Vui lòng chọn 1 bản ghi')
   } else if (action === 'save') {
     if (validateForm()) {
-      alert('Lưu người dùng thành công!')
-      mode.value = 'view'
+      try {
+        if (mode.value === 'add') await userStore.create(formData.value)
+        else await userStore.update(formData.value.custId, formData.value)
+        alert('Lưu người dùng thành công!')
+        mode.value = 'view'
+        userStore.fetchAll()
+      } catch (e) {
+        alert('Lỗi: ' + (userStore.error || 'Thất bại'))
+      }
     }
-  } else if (action === 'delete') {
-    if (selectedUser.value) {
-      if (confirm('Bạn có chắc muốn xoá user này?')) alert('Đã yêu cầu khoá/xoá!')
-    }
+  } else if (action === 'refresh') {
+    userStore.fetchAll()
   }
 }
 

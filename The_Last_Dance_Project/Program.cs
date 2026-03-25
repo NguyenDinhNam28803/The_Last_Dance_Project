@@ -6,6 +6,8 @@ using System.Text;
 using The_Last_Dance_Project.Data;
 using The_Last_Dance_Project.Interfaces;
 using The_Last_Dance_Project.Services;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,10 +51,9 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "The Last Dance API", Version = "v1" });
 
-    // 1. Định nghĩa cơ chế bảo mật (Security Definition)
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Name = "Authorization", // Tên header thường dùng là Authorization
+        Name = "Authorization",
         Description = "Nhập Token theo định dạng: Bearer {your_token}",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.Http,
@@ -60,7 +61,6 @@ builder.Services.AddSwaggerGen(options =>
         BearerFormat = "JWT"
     });
 
-    // 2. Áp dụng yêu cầu bảo mật (Security Requirement)
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {

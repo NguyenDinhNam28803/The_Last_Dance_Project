@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'https://localhost:7001/api', // Thay đổi khi có backend
+  baseURL: 'https://localhost:7280/api',
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' }
 })
@@ -30,39 +30,45 @@ api.interceptors.response.use(
 
 export default api
 
-// ===== API Endpoints (sẵn sàng khi có backend) =====
-// Auth
-// api.post('/Auth/login', { userName, password, rememberMe })
-// api.post('/Auth/register', { userName, password, email, phoneNumber })
-// api.post('/Auth/logout')
-// api.post('/Auth/refresh-token', { accessToken, refreshToken })
-// api.get('/Auth/me')
+// ===== API Services =====
+export const AuthService = {
+  login: (credentials) => api.post('/Auth/login', credentials),
+  register: (userData) => api.post('/Auth/register', userData),
+  logout: () => api.post('/Auth/logout'),
+  refreshToken: (tokenData) => api.post('/Auth/refresh-token', tokenData),
+  me: () => api.get('/Auth/me')
+}
 
-// User Management
-// api.get('/User')
-// api.get('/User/{id}')
-// api.post('/User', dto)
-// api.put('/User/{id}', dto)
-// api.patch('/User/{id}/role', { roleId })
-// api.patch('/User/{id}/toggle-status')
+export const UserService = {
+  getAll: () => api.get('/User'),
+  getById: (id) => api.get(`/User/${id}`),
+  create: (dto) => api.post('/User', dto),
+  update: (id, dto) => api.put(`/User/${id}`, dto),
+  updateRole: (id, roleData) => api.patch(`/User/${id}/role`, roleData),
+  toggleStatus: (id) => api.patch(`/User/${id}/toggle-status`)
+}
 
-// Customer Contact
-// api.get('/CustomerContact')
-// api.get('/CustomerContact/{id}')
-// api.get('/CustomerContact/customer/{custId}')
-// api.post('/CustomerContact', dto)
-// api.put('/CustomerContact/{id}', dto)
-// api.delete('/CustomerContact/{id}')
-// api.patch('/CustomerContact/{id}/set-default')
+export const CustomerContactService = {
+  getAll: () => api.get('/CustomerContact'),
+  getById: (id) => api.get(`/CustomerContact/${id}`),
+  getByCustomer: (custId) => api.get(`/CustomerContact/customer/${custId}`),
+  create: (dto) => api.post('/CustomerContact', dto),
+  update: (id, dto) => api.put(`/CustomerContact/${id}`, dto),
+  delete: (id) => api.delete(`/CustomerContact/${id}`),
+  setDefault: (id) => api.patch(`/CustomerContact/${id}/set-default`)
+}
 
-// Audit
-// api.get('/Audit')
+export const AuditService = {
+  getAll: () => api.get('/Audit')
+}
 
-// Maker-Checker
-// api.post('/MakerChecker/submit', { entityName, entityId, action, details })
-// api.post('/MakerChecker/{id}/approve')
-// api.post('/MakerChecker/{id}/reject', reason)
+export const MakerCheckerService = {
+  submit: (data) => api.post('/MakerChecker/submit', data),
+  approve: (id) => api.post(`/MakerChecker/${id}/approve`),
+  reject: (id, reason) => api.post(`/MakerChecker/${id}/reject`, { reason })
+}
 
-// System Code
-// api.get('/SystemCode')
-// api.post('/SystemCode', systemCode)
+export const SystemCodeService = {
+  getAll: () => api.get('/SystemCode'),
+  create: (systemCode) => api.post('/SystemCode', systemCode)
+}

@@ -8,8 +8,11 @@
       <button class="btn btn-primary" @click="openCreateModal">➕ Thêm liên hệ</button>
     </div>
 
+    <!-- Loading State -->
+    <div v-if="contactStore.loading" class="text-center">Đang tải...</div>
+
     <!-- Filter -->
-    <div class="filter-bar">
+    <div v-else class="filter-bar">
       <div class="search-input">
         <span class="search-icon">🔍</span>
         <input v-model="search" type="text" class="form-control" placeholder="Tìm theo CustId, nội dung liên hệ..." />
@@ -54,8 +57,8 @@
               <td>
                 <div class="actions-cell">
                   <button class="btn btn-ghost btn-sm" @click="openEditModal(c)" title="Sửa">✏️</button>
-                  <button class="btn btn-ghost btn-sm" @click="setDefault(c)" title="Đặt mặc định" :disabled="c.isDefault === 'Y'">⭐</button>
-                  <button class="btn btn-ghost btn-sm" @click="deleteContact(c)" title="Xóa">🗑️</button>
+                  <button class="btn btn-ghost btn-sm" @click="handleSetDefault(c)" title="Đặt mặc định" :disabled="c.isDefault === 'Y'">⭐</button>
+                  <button class="btn btn-ghost btn-sm" @click="handleDelete(c)" title="Xóa">🗑️</button>
                 </div>
               </td>
             </tr>
@@ -146,15 +149,15 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive } from 'vue'
-import { mockContacts, addTypeLabels } from '../data/mockData'
+import { ref, computed, reactive, onMounted } from 'vue'
+import { useCustomerContactStore } from '@/stores/customerContact'
+import { addTypeLabels } from '../data/mockData'
 
-const contacts = ref([...mockContacts])
+const contactStore = useCustomerContactStore()
 const search = ref('')
 const filterType = ref('')
 const showModal = ref(false)
 const isEditing = ref(false)
-const editingId = ref(null)
 const toast = ref(null)
 
 const modalForm = reactive({
@@ -162,8 +165,10 @@ const modalForm = reactive({
   contact: '', faxAttention: '', isDefault: 'N', description: ''
 })
 
+onMounted(() => contactStore.fetchAll())
+
 const filteredContacts = computed(() => {
-  return contacts.value.filter(c => {
+  return contactStore.contacts.filter(c => {
     const matchSearch = !search.value || [c.custId, c.contact, c.contactId].some(v => v?.toLowerCase().includes(search.value.toLowerCase()))
     const matchType = !filterType.value || c.addType === filterType.value
     return matchSearch && matchType
@@ -180,33 +185,45 @@ function openCreateModal() {
 
 function openEditModal(c) {
   isEditing.value = true
-  editingId.value = c.contactId
   Object.assign(modalForm, { ...c })
   showModal.value = true
 }
 
-function saveContact() {
-  if (isEditing.value) {
-    const idx = contacts.value.findIndex(c => c.contactId === editingId.value)
-    if (idx > -1) contacts.value[idx] = { ...contacts.value[idx], ...modalForm }
-    showToast('Cập nhật liên hệ thành công!', 'success')
-  } else {
-    contacts.value.push({ ...modalForm })
-    showToast('Thêm liên hệ thành công!', 'success')
+async function saveContact() {
+  try {
+    if (isEditing.value) {
+      await contactStore.update(modalForm.contactId, modalForm)
+      showToast('Cập nhật liên hệ thành công!', 'success')
+    } else {
+      await contactStore.create(modalForm)
+      showToast('Thêm liên hệ thành công!', 'success')
+    }
+    await contactStore.fetchAll()
+    showModal.value = false
+  } catch (err) {
+    showToast('Lỗi: ' + (contactStore.error || 'Thất bại'), 'error')
   }
-  showModal.value = false
 }
 
-function setDefault(c) {
-  contacts.value.filter(x => x.custId === c.custId && x.addType === c.addType).forEach(x => x.isDefault = 'N')
-  c.isDefault = 'Y'
-  showToast('Đã đặt mặc định thành công!', 'success')
+async function handleSetDefault(c) {
+  try {
+    await contactStore.setDefault(c.contactId)
+    await contactStore.fetchAll()
+    showToast('Đã đặt mặc định thành công!', 'success')
+  } catch (err) {
+    showToast('Lỗi: ' + (contactStore.error || 'Thất bại'), 'error')
+  }
 }
 
-function deleteContact(c) {
+async function handleDelete(c) {
   if (confirm('Bạn có chắc muốn xóa liên hệ này?')) {
-    contacts.value = contacts.value.filter(x => x.contactId !== c.contactId)
-    showToast('Xóa liên hệ thành công!', 'success')
+    try {
+      await contactStore.delete(c.contactId)
+      await contactStore.fetchAll()
+      showToast('Xóa liên hệ thành công!', 'success')
+    } catch (err) {
+      showToast('Lỗi: ' + (contactStore.error || 'Thất bại'), 'error')
+    }
   }
 }
 
