@@ -8,11 +8,13 @@ namespace The_Last_Dance_Project.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+        private readonly IWebHostEnvironment _env;
 
-        public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
+        public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger, IWebHostEnvironment env)
         {
             _next = next;
             _logger = logger;
+            _env = env;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -23,24 +25,35 @@ namespace The_Last_Dance_Project.Middleware
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An unhandled exception has occurred.");
+                _logger.LogError(ex, "An unhandled exception has occurred: {Message}", ex.Message);
                 await HandleExceptionAsync(context, ex);
             }
         }
 
-        private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            
+            var statusCode = exception switch
+            {
+                UnauthorizedAccessException => HttpStatusCode.Unauthorized,
+                KeyNotFoundException => HttpStatusCode.NotFound,
+                ArgumentException => HttpStatusCode.BadRequest,
+                _ => HttpStatusCode.InternalServerError
+            };
+
+            context.Response.StatusCode = (int)statusCode;
 
             var response = new
             {
                 Status = context.Response.StatusCode,
-                Message = "Internal Server Error. Please contact support.",
-                Detailed = exception.Message // Chỉ nên hiển thị trong môi trường Development
+                Message = statusCode == HttpStatusCode.InternalServerError 
+                    ? "Internal Server Error. Please contact support." 
+                    : exception.Message,
+                Detailed = _env.IsDevelopment() ? exception.StackTrace : null
             };
 
-            return context.Response.WriteAsync(JsonSerializer.Serialize(response));
+            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
         }
     }
 }

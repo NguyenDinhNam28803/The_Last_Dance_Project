@@ -7,7 +7,8 @@
         @action="handleToolbarAction"
       />
      
-      <div v-if="!selectedCode && mode === 'view'" class="alert-info mt-4 p-3">
+      <div v-if="systemCodeStore.loading" class="mt-4 p-3 text-center">Đang tải...</div>
+      <div v-else-if="!selectedCode && mode === 'view'" class="alert-info mt-4 p-3">
         Vui lòng chọn một danh mục bên phải để xem chi tiết.
       </div>
       <div v-else class="form-section mt-4">
@@ -37,7 +38,7 @@
    
     <div class="grid-panel" :class="{ collapsed: isGridCollapsed }">
       <div class="grid-panel-header">
-        <span>Tham số ({{ codes.length }})</span>
+        <span>Tham số ({{ systemCodeStore.codes.length }})</span>
         <button class="btn btn-outline" style="padding: 0 10px;" @click="isGridCollapsed = !isGridCollapsed" title="Đóng/Mở lưới">
           <i class="fas" :class="isGridCollapsed ? 'fa-chevron-left' : 'fa-chevron-right'"></i>
           <span v-if="!isGridCollapsed" style="margin-left:5px">Thu gọn</span>
@@ -55,7 +56,7 @@
           </thead>
           <tbody>
             <tr
-              v-for="code in codes"
+              v-for="code in systemCodeStore.codes"
               :key="code.id"
               :class="{ active: selectedCode?.id === code.id }"
               @click="selectCode(code)"
@@ -76,37 +77,45 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import Toolbar from '@/components/common/Toolbar.vue'
 import ValidationInput from '@/components/common/ValidationInput.vue'
-import { mockSystemCodes } from '@/data/mockData'
+import { useSystemCodeStore } from '@/stores/system'
 
+const systemCodeStore = useSystemCodeStore()
 const isGridCollapsed = ref(false)
 const mode = ref('view')
-const codes = ref(mockSystemCodes)
 const selectedCode = ref(null)
 const formData = ref({})
 const errors = ref({})
 
+onMounted(() => systemCodeStore.fetchAll())
+
 const toolbarFeatures = computed(() => {
   if (mode.value === 'add' || mode.value === 'edit') return ['Save', 'Cancel']
-  return ['Add', 'Edit', 'Delete', 'Refresh']
+  return ['Add', 'Refresh']
 })
 
-const handleToolbarAction = (action) => {
+const handleToolbarAction = async (action) => {
   if (action === 'add') {
     mode.value = 'add'
     formData.value = { isActive: true }
   } else if (action === 'cancel') {
     mode.value = 'view'
     if (selectedCode.value) selectCode(selectedCode.value)
-  } else if (action === 'edit') {
-    if (selectedCode.value) mode.value = 'edit'
   } else if (action === 'save') {
     if (validateForm()) {
-      alert('Lưu thành công!')
-      mode.value = 'view'
+      try {
+        await systemCodeStore.create(formData.value)
+        alert('Lưu thành công!')
+        mode.value = 'view'
+        await systemCodeStore.fetchAll()
+      } catch (e) {
+        alert('Lỗi: ' + (systemCodeStore.error || 'Thất bại'))
+      }
     }
+  } else if (action === 'refresh') {
+    systemCodeStore.fetchAll()
   }
 }
 

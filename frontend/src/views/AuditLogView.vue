@@ -2,7 +2,7 @@
   <div class="main-content flex-column">
     <Toolbar 
       title="Nhật ký hệ thống (Audit Trail)" 
-      :features="['Search', 'Refresh', 'Clear']" 
+      :features="['Search', 'Refresh']" 
       @action="handleAction"
     />
     
@@ -23,7 +23,8 @@
       </div>
     </div>
     
-    <div class="grid-content bg-white flex-1 p-3" style="overflow-y:auto">
+    <div v-if="auditStore.loading" class="text-center p-5">Đang tải nhật ký...</div>
+    <div v-else class="grid-content bg-white flex-1 p-3" style="overflow-y:auto">
       <table class="grid-table">
         <thead>
           <tr>
@@ -37,7 +38,7 @@
           </tr>
         </thead>
         <tbody>
-          <template v-for="log in logs" :key="log.id">
+          <template v-for="log in auditLogs" :key="log.id">
             <tr @click="log.expanded = !log.expanded" style="cursor:pointer">
               <td class="text-center">
                 <i class="fas" :class="log.expanded ? 'fa-minus-square text-primary' : 'fa-plus-square text-muted'"></i>
@@ -63,9 +64,9 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(val, key) in JSON.parse(log.newVal || '{}')" :key="key">
+                    <tr v-for="(val, key) in parseJson(log.newVal)" :key="key">
                       <td class="font-weight-bold">{{ key }}</td>
-                      <td class="text-danger text-decoration-line-through">{{ JSON.parse(log.oldVal || '{}')[key] || '-' }}</td>
+                      <td class="text-danger text-decoration-line-through">{{ parseJson(log.oldVal)[key] || '-' }}</td>
                       <td class="text-success">{{ val }}</td>
                     </tr>
                   </tbody>
@@ -80,23 +81,28 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import Toolbar from '@/components/common/Toolbar.vue'
 import ValidationInput from '@/components/common/ValidationInput.vue'
-import { mockAuditLogs } from '@/data/mockData'
+import { useAuditStore } from '@/stores/system'
 
+const auditStore = useAuditStore()
 const filters = ref({ fromDate: '', toDate: '', maker: '' })
 
-// Thêm prop `expanded` vào logs
-const logs = ref(mockAuditLogs.map(l => ({ ...l, expanded: false })))
+// Add local state for expanded rows to original data
+const auditLogs = computed(() => auditStore.logs.map(l => ({ ...l, expanded: false })))
 
-const handleAction = (action) => {
-  if (action === 'search') {
-    alert('Tìm kiếm audit logs...')
-  } else if (action === 'clear') {
-    filters.value = { fromDate: '', toDate: '', maker: '' }
-  } else if (action === 'refresh') {
-    // refresh logic
+onMounted(() => auditStore.fetchLogs())
+
+const parseJson = (str) => {
+  try { return JSON.parse(str || '{}') } catch (e) { return {} }
+}
+
+const handleAction = async (action) => {
+  if (action === 'refresh') {
+    await auditStore.fetchLogs()
+  } else if (action === 'search') {
+    alert('Tìm kiếm theo filter chưa được triển khai phía backend')
   }
 }
 

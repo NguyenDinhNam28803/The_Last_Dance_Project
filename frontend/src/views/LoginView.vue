@@ -49,13 +49,13 @@
             </label>
           </div>
 
-          <button type="submit" class="btn btn-login" :disabled="isLoading || !isValid">
-            {{ isLoading ? 'Đang xử lý...' : 'Đăng nhập' }}
+          <button type="submit" class="btn btn-login" :disabled="authStore.loading || !isValid">
+            {{ authStore.loading ? 'Đang xử lý...' : 'Đăng nhập' }}
           </button>
         </form>
         
-        <div v-if="apiError" class="alert-error mt-3">
-          {{ apiError }}
+        <div v-if="authStore.error" class="alert-error mt-3">
+          {{ authStore.error }}
         </div>
       </div>
     </div>
@@ -75,8 +75,6 @@ const username = ref('')
 const password = ref('')
 const rememberMe = ref(false)
 const showPassword = ref(false)
-const isLoading = ref(false)
-const apiError = ref('')
 
 const errors = reactive({
   username: '',
@@ -97,50 +95,15 @@ const validateUsername = () => {
     errors.username = 'Tài khoản không được để trống'
     return false
   }
-  if (username.value.includes(' ') || /[^\x00-\x7F]/.test(username.value)) { // Check non-ascii (tieng viet) and space
-    errors.username = 'Tài khoản không được chứa khoảng trắng hoặc Tiếng Việt'
-    return false
-  }
   errors.username = ''
   return true
 }
 
 const validatePassword = () => {
-  const p = password.value
-  if (!p) {
+  if (!password.value) {
     errors.password = 'Mật khẩu không được để trống'
     return false
   }
-  if (p.length < 8 || p.length > 20) {
-    errors.password = 'Mật khẩu phải từ 8 đến 20 ký tự'
-    return false
-  }
-  if (p.toLowerCase() === username.value.toLowerCase()) {
-    errors.password = 'Mật khẩu không được trùng với tài khoản'
-    return false
-  }
-  if (p.includes(' ') || /[^\x00-\x7F]/.test(p)) {
-    errors.password = 'Mật khẩu không được chứa khoảng trắng hoặc Tiếng Việt'
-    return false
-  }
-  
-  // Complexity: 1 upper, 1 lower, 1 number, 1 special
-  const hasUpper = /[A-Z]/.test(p)
-  const hasLower = /[a-z]/.test(p)
-  const hasNumber = /[0-9]/.test(p)
-  const hasSpecial = /[!@#$%^&*()_+\-={}\[\]:;,.?/]/.test(p)
-  
-  if (!hasUpper || !hasLower || !hasNumber || !hasSpecial) {
-    errors.password = 'Mật khẩu phải chứa ít nhất 1 ký tự Hoa, 1 thường, 1 số và 1 ký tự đặc biệt'
-    return false
-  }
-  
-  // Sequencial check (simple)
-  if (/(012|123|234|345|456|567|689|789|abc|bcd|cde)/i.test(p)) {
-    errors.password = 'Mật khẩu không được dùng chuỗi tuần tự'
-    return false
-  }
-  
   errors.password = ''
   return true
 }
@@ -152,25 +115,21 @@ const isValid = computed(() => {
 const handleLogin = async () => {
   if (!validateUsername() || !validatePassword()) return
   
-  isLoading.value = true
-  apiError.value = ''
-  
   try {
-    const success = await authStore.login(username.value, password.value)
-    if (success) {
-      if (rememberMe.value) {
-        localStorage.setItem('nav_remember_user', username.value)
-      } else {
-        localStorage.removeItem('nav_remember_user')
-      }
-      router.push('/dashboard')
+    await authStore.login({ 
+      userName: username.value, 
+      password: password.value, 
+      rememberMe: rememberMe.value 
+    })
+    
+    if (rememberMe.value) {
+      localStorage.setItem('nav_remember_user', username.value)
     } else {
-      apiError.value = 'Tài khoản hoặc mật khẩu không chính xác (Thử: admin/Navi@2024)'
+      localStorage.removeItem('nav_remember_user')
     }
+    router.push('/dashboard')
   } catch (err) {
-    apiError.value = err.message || 'Lỗi kết nối đến máy chủ.'
-  } finally {
-    isLoading.value = false
+    // Error is handled by authStore
   }
 }
 </script>

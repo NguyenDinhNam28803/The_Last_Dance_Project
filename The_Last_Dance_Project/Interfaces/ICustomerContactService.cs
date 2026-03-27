@@ -1,18 +1,17 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using The_Last_Dance_Project.Dtos;
-using The_Last_Dance_Project.Models;
 
-namespace The_Last_Dance_Project.Services
+namespace The_Last_Dance_Project.Interfaces
 {
     public interface ICustomerContactService
     {
         Task<IEnumerable<CustomerContactDto>> GetAllAsync();
-        Task<CustomerContactDto?> GetByIdAsync(string contactId);
+        Task<CustomerContactDto?> GetByIdAsync(string id);
         Task<IEnumerable<CustomerContactDto>> GetByCustomerIdAsync(string custId);
-        Task<bool> CreateAsync(CustomerContactCreateDto dto);
-        Task<bool> UpdateAsync(string contactId, CustomerContactUpdateDto dto);
-        Task<bool> DeleteAsync(string contactId);
-        Task<bool> SetDefaultContactAsync(string contactId);
+        Task<CustomerContactDto> CreateAsync(CustomerContactCreateDto dto);
+        Task<CustomerContactDto?> UpdateAsync(string id, CustomerContactUpdateDto dto);
+        Task<bool> DeleteAsync(string id);
+        Task<bool> SetDefaultAsync(string id);
     }
 }
