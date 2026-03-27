@@ -72,9 +72,13 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !isAuthenticated) {
     next('/login')
   } else if (to.meta.requiresGuest && isAuthenticated) {
-    next('/clients')
+    next('/dashboard')
   } else if (to.meta.requiresAdmin && !authStore.isAdmin) {
-    next('/clients') // Redirect non-admins away from admin pages
+    next('/dashboard')
+  } else if (to.meta.requiresChecker && !authStore.isChecker && !authStore.isAdmin) {
+    next('/dashboard')
+  } else if (to.meta.requiresMaker && !authStore.isMaker && !authStore.isAdmin) {
+    next('/dashboard')
   } else {
     next()
   }

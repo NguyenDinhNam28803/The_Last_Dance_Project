@@ -58,10 +58,10 @@
             <tr
               v-for="code in systemCodeStore.codes"
               :key="code.id"
-              :class="{ active: selectedCode?.id === code.id }"
+              :class="{ active: selectedCode?.systemcodeid === code.systemcodeid }"
               @click="selectCode(code)"
             >
-              <td class="font-weight-bold">{{ code.id }}</td>
+              <td class="font-weight-bold">{{ code.systemcodeid }}</td>
               <td>{{ code.name }}</td>
               <td>
                 <span class="status-badge" :class="code.isActive ? 'success' : 'secondary'">

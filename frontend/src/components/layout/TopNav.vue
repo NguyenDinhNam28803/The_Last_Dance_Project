@@ -7,12 +7,12 @@
         <span class="logo-sub">SOFTWARE</span>
       </router-link>
      
-      <router-link to="/system-code" class="topnav-link" active-class="active">THAM SỐ HỆ THỐNG</router-link>
-      <router-link to="/users" class="topnav-link" active-class="active">QS NGƯỜI DÙNG</router-link>
+      <router-link v-if="authStore.isAdmin" to="/system-code" class="topnav-link" active-class="active">THAM SỐ HỆ THỐNG</router-link>
+      <router-link v-if="authStore.isAdmin" to="/users" class="topnav-link" active-class="active">QS NGƯỜI DÙNG</router-link>
       <router-link to="/clients" class="topnav-link" active-class="active">KHÁCH HÀNG</router-link>
       <router-link to="/contacts" class="topnav-link" active-class="active">LIÊN HỆ</router-link>
-      <router-link to="/maker-checker" class="topnav-link" active-class="active">PHÊ DUYỆT</router-link>
-      <router-link to="/audit" class="topnav-link" active-class="active">NHẬT KÝ HỆ THỐNG</router-link>
+      <router-link v-if="authStore.isMaker || authStore.isChecker" to="/maker-checker" class="topnav-link" active-class="active">PHÊ DUYỆT</router-link>
+      <router-link v-if="authStore.isAdmin" to="/audit" class="topnav-link" active-class="active">NHẬT KÝ HỆ THỐNG</router-link>
     </div>
    
     <div class="user-info">

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace The_Last_Dance_Project.Models
 {
-    public class Auditentity
+    public class AuditEntity
     {
         [Key]
         [Column("MTTRANID")]

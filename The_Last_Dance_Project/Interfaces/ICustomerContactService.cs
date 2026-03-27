@@ -13,5 +13,6 @@ namespace The_Last_Dance_Project.Interfaces
         Task<CustomerContactDto?> UpdateAsync(string id, CustomerContactUpdateDto dto);
         Task<bool> DeleteAsync(string id);
         Task<bool> SetDefaultAsync(string id);
+        Task<bool> ApplyMakerCheckerAsync(string action, string details);
     }
 }

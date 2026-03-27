@@ -78,12 +78,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import Toolbar from '@/components/common/Toolbar.vue'
 import ValidationInput from '@/components/common/ValidationInput.vue'
 import { useClientStore } from '@/stores/client'
+import { useAuthStore } from '@/stores/auth'
 
 const clientStore = useClientStore()
+const authStore = useAuthStore()
+
 const isGridCollapsed = ref(false)
 const currentTab = ref('general')
 const mode = ref('view')
@@ -96,7 +99,12 @@ onMounted(() => clientStore.fetchAll())
 
 const toolbarFeatures = computed(() => {
   if (mode.value === 'add' || mode.value === 'edit') return ['Save', 'Cancel']
-  return ['Search', 'Add', 'Edit', 'Delete']
+  
+  const base = ['Search']
+  if (authStore.isMaker || authStore.isAdmin) {
+    base.push('Add', 'Edit', 'Delete')
+  }
+  return base
 })
 
 const handleToolbarAction = async (action) => {

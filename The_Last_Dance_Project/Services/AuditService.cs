@@ -14,14 +14,14 @@ namespace The_Last_Dance_Project.Services
             _context = context;
         }
 
-        public async Task<List<Auditentity>> GetAllLogsAsync()
+        public async Task<List<AuditEntity>> GetAllLogsAsync()
         {
-            return await _context.Auditentities.Include(a => a.MtTranId).ToListAsync();
+            return await _context.AuditEntities.ToListAsync();
         }
     }
 
     public interface IAuditService
     {
-        Task<List<Auditentity>> GetAllLogsAsync();
+        Task<List<AuditEntity>> GetAllLogsAsync();
     }
 }

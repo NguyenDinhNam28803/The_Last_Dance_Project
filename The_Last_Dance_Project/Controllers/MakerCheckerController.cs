@@ -17,6 +17,13 @@ namespace The_Last_Dance_Project.Controllers
 
         private string GetUserId() => User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "SYSTEM";
 
+        [HttpGet("pending")]
+        public async Task<IActionResult> GetPending()
+        {
+            var requests = await _service.GetPendingRequestsAsync();
+            return Ok(requests);
+        }
+
         [HttpPost("submit")]
         public async Task<IActionResult> Submit([FromBody] MakerCheckerRequest request)
         {
@@ -32,10 +39,17 @@ namespace The_Last_Dance_Project.Controllers
         }
 
         [HttpPost("{id}/reject")]
-        public async Task<IActionResult> Reject(int id, [FromBody] string reason)
+        public async Task<IActionResult> Reject(int id, [FromBody] RejectRequest request)
         {
-            var success = await _service.RejectRequestAsync(id, GetUserId(), reason);
+            var success = await _service.RejectRequestAsync(id, GetUserId(), request.Reason);
             return success ? Ok("Đã từ chối.") : BadRequest("Từ chối thất bại.");
+        }
+
+        [HttpPost("{id}/cancel")]
+        public async Task<IActionResult> Cancel(int id)
+        {
+            var success = await _service.CancelRequestAsync(id, GetUserId());
+            return success ? Ok("Đã hủy yêu cầu.") : BadRequest("Hủy yêu cầu thất bại.");
         }
     }
 
@@ -45,5 +59,10 @@ namespace The_Last_Dance_Project.Controllers
         public string EntityId { get; set; } = string.Empty;
         public string Action { get; set; } = string.Empty;
         public string Details { get; set; } = string.Empty;
+    }
+
+    public class RejectRequest
+    {
+        public string Reason { get; set; } = string.Empty;
     }
 }

@@ -23,6 +23,7 @@ api.interceptors.response.use(
       localStorage.removeItem('user')
       localStorage.removeItem('token')
       window.location.href = '/login'
+      // console.error("Lỗi không đăng nhập được")
     }
     return Promise.reject(error)
   }
@@ -63,9 +64,11 @@ export const AuditService = {
 }
 
 export const MakerCheckerService = {
+  getPending: () => api.get('/MakerChecker/pending'),
   submit: (data) => api.post('/MakerChecker/submit', data),
   approve: (id) => api.post(`/MakerChecker/${id}/approve`),
-  reject: (id, reason) => api.post(`/MakerChecker/${id}/reject`, { reason })
+  reject: (id, reason) => api.post(`/MakerChecker/${id}/reject`, { reason }),
+  cancel: (id) => api.post(`/MakerChecker/${id}/cancel`)
 }
 
 export const SystemCodeService = {

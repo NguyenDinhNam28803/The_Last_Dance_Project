@@ -119,5 +119,45 @@ namespace The_Last_Dance_Project.Services
             target.IsDefault = "Y";
             return await _db.SaveChangesAsync() > 0;
         }
+
+        public async Task<bool> ApplyMakerCheckerAsync(string action, string details)
+        {
+            try
+            {
+                if (action == "CREATE")
+                {
+                    var dto = System.Text.Json.JsonSerializer.Deserialize<CustomerContactCreateDto>(details);
+                    if (dto == null) return false;
+                    await CreateAsync(dto);
+                }
+                else if (action == "UPDATE")
+                {
+                    // For update, the details should contain both ID and the update DTO, 
+                    // or we could use a specialized DTO. For simplicity, let's assume it has everything.
+                    var dto = System.Text.Json.JsonSerializer.Deserialize<CustomerContact>(details);
+                    if (dto == null) return false;
+                    var existing = await _db.CustomerContacts.FindAsync(dto.ContactId);
+                    if (existing == null) return false;
+
+                    _db.Entry(existing).CurrentValues.SetValues(dto);
+                }
+                else if (action == "DELETE")
+                {
+                    var id = details; // Assuming details is just the ID for delete
+                    await DeleteAsync(id);
+                }
+                else if (action == "SET_DEFAULT")
+                {
+                    var id = details;
+                    await SetDefaultAsync(id);
+                }
+
+                return await _db.SaveChangesAsync() > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

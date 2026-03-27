@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using The_Last_Dance_Project.Data;
 
@@ -11,9 +12,11 @@ using The_Last_Dance_Project.Data;
 namespace The_Last_Dance_Project.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260327151448_CheckRole")]
+    partial class CheckRole
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -515,12 +518,6 @@ namespace The_Last_Dance_Project.Migrations
                             RoleId = "CHECKER",
                             Description = "Approve or reject requests",
                             Name = "Checker"
-                        },
-                        new
-                        {
-                            RoleId = "ADMIN",
-                            Description = "Approve or reject requests and Manage System",
-                            Name = "Admin"
                         });
                 });
 

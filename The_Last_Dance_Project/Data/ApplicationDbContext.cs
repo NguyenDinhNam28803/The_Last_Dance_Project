@@ -14,8 +14,8 @@ namespace The_Last_Dance_Project.Data
         public DbSet<CustomerContact> CustomerContacts { get; set; }
         public DbSet<Role> Roles { get; set; }
 
-        // 2. Nhóm Audit (Lưu ý: Đã đổi tên thành Auditentity theo file của bạn)
-        public DbSet<Auditentity> Auditentities { get; set; }
+        // 2. Nhóm Audit
+        public DbSet<AuditEntity> AuditEntities { get; set; }
         public DbSet<AuditEntityKey> AuditEntityKeys { get; set; }
         public DbSet<AuditEntityKeyDefinition> AuditEntityKeyDefinitions { get; set; }
 
@@ -30,8 +30,19 @@ namespace The_Last_Dance_Project.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Cấu hình bảng Auditentity (Ánh xạ đúng vào bảng MTTRAN trong DB)
-            modelBuilder.Entity<Auditentity>(entity => {
+            // Seed Role data
+            modelBuilder.Entity<Role>(entity => {
+                entity.ToTable("ROLE");
+                entity.HasKey(e => e.RoleId);
+                entity.HasData(
+                    new Role { RoleId = "MAKER", Name = "Maker", Description = "Create and modify requests" },
+                    new Role { RoleId = "CHECKER", Name = "Checker", Description = "Approve or reject requests" },
+                    new Role { RoleId = "ADMIN", Name = "Admin", Description = "Approve or reject requests and Manage System" }
+                );
+            });
+
+            // Cấu hình bảng AuditEntity (Ánh xạ đúng vào bảng MTTRAN trong DB)
+            modelBuilder.Entity<AuditEntity>(entity => {
                 entity.ToTable("MTTRAN");
                 entity.HasKey(e => e.MtTranId);
                 entity.Property(e => e.MtTranId).UseIdentityColumn();
@@ -43,8 +54,8 @@ namespace The_Last_Dance_Project.Data
                 entity.HasKey(e => e.MtTranFldId);
                 entity.Property(e => e.MtTranFldId).UseIdentityColumn();
 
-                // Khóa ngoại liên kết tới Auditentity (MTTRAN)
-                entity.HasOne<Auditentity>()
+                // Khóa ngoại liên kết tới AuditEntity (MTTRAN)
+                entity.HasOne<AuditEntity>()
                     .WithMany()
                     .HasForeignKey(d => d.MtTranId)
                     .OnDelete(DeleteBehavior.Cascade);
@@ -95,12 +106,24 @@ namespace The_Last_Dance_Project.Data
 
             // Cấu hình Customer
             modelBuilder.Entity<Customer>(entity => {
-                entity.ToTable("CUSTOMER");
+                entity.ToTable("Customers");
                 entity.HasKey(e => e.CustId);
-                
+
+                // Mật khẩu "password123" băm bằng BCrypt
+                string hashedPw = "$2a$11$qR7i5J2k5W.O7pL7X/f8/.hHqXmZ.xH1v5B8j0C9iE8A1D1G1I1K1"; 
+                var staticDate = new DateTime(2026, 3, 27, 0, 0, 0, DateTimeKind.Utc);
+
                 entity.HasData(
-                    new Customer { CustId = "USR001", UserName = "maker_trung", Name = "Nguyễn Văn Maker", RoleId = "MAKER", Status = "Active" },
-                    new Customer { CustId = "USR002", UserName = "checker_lan", Name = "Trần Thị Checker", RoleId = "CHECKER", Status = "Active" }
+                    new Customer { 
+                        CustId = "ACC_MAKER_001", UserName = "maker_system", Name = "Maker System Account", 
+                        RoleId = "MAKER", Status = "Active", PasswordHash = hashedPw, RecordStatus = "1",
+                        Email = "maker_sys@test.com", CreatedDate = staticDate 
+                    },
+                    new Customer { 
+                        CustId = "ACC_CHECKER_001", UserName = "checker_system", Name = "Checker System Account", 
+                        RoleId = "CHECKER", Status = "Active", PasswordHash = hashedPw, RecordStatus = "1",
+                        Email = "checker_sys@test.com", CreatedDate = staticDate 
+                    }
                 );
 
                 entity.HasOne<Role>()

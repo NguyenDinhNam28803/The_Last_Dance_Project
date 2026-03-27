@@ -76,6 +76,6 @@ namespace The_Last_Dance_Project.Models
 
         // Quan hệ Navigation
         [ForeignKey("MtTranId")]
-        public virtual Auditentity? Auditentity { get; set; }
+        public virtual AuditEntity? Auditentity { get; set; }
     }
 }

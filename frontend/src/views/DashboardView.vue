@@ -74,6 +74,9 @@
 <script setup>
 import { computed } from 'vue'
 import { mockUsers, mockAuditLogs } from '../data/mockData'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
 
 const stats = computed(() => ({
   totalUsers: mockUsers.length,

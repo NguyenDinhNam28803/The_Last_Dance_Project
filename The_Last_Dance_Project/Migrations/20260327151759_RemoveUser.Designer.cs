@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using The_Last_Dance_Project.Data;
 
@@ -11,9 +12,11 @@ using The_Last_Dance_Project.Data;
 namespace The_Last_Dance_Project.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260327151759_RemoveUser")]
+    partial class RemoveUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -406,32 +409,6 @@ namespace The_Last_Dance_Project.Migrations
                     b.HasIndex("RoleId1");
 
                     b.ToTable("Customers", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            CustId = "ACC_MAKER_001",
-                            CreatedDate = new DateTime(2026, 3, 27, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "maker_sys@test.com",
-                            Name = "Maker System Account",
-                            PasswordHash = "$2a$11$qR7i5J2k5W.O7pL7X/f8/.hHqXmZ.xH1v5B8j0C9iE8A1D1G1I1K1",
-                            RecordStatus = "1",
-                            RoleId = "MAKER",
-                            Status = "Active",
-                            UserName = "maker_system"
-                        },
-                        new
-                        {
-                            CustId = "ACC_CHECKER_001",
-                            CreatedDate = new DateTime(2026, 3, 27, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "checker_sys@test.com",
-                            Name = "Checker System Account",
-                            PasswordHash = "$2a$11$qR7i5J2k5W.O7pL7X/f8/.hHqXmZ.xH1v5B8j0C9iE8A1D1G1I1K1",
-                            RecordStatus = "1",
-                            RoleId = "CHECKER",
-                            Status = "Active",
-                            UserName = "checker_system"
-                        });
                 });
 
             modelBuilder.Entity("The_Last_Dance_Project.Models.CustomerContact", b =>
@@ -515,12 +492,6 @@ namespace The_Last_Dance_Project.Migrations
                             RoleId = "CHECKER",
                             Description = "Approve or reject requests",
                             Name = "Checker"
-                        },
-                        new
-                        {
-                            RoleId = "ADMIN",
-                            Description = "Approve or reject requests and Manage System",
-                            Name = "Admin"
                         });
                 });
 

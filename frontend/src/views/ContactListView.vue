@@ -5,7 +5,7 @@
         <h1 class="page-title">Thông tin liên hệ</h1>
         <p class="page-subtitle">Quản lý thông tin liên hệ khách hàng</p>
       </div>
-      <button class="btn btn-primary" @click="openCreateModal">➕ Thêm liên hệ</button>
+      <button v-if="authStore.isMaker || authStore.isAdmin" class="btn btn-primary" @click="openCreateModal">➕ Thêm liên hệ</button>
     </div>
 
     <!-- Loading State -->
@@ -55,11 +55,12 @@
               </td>
               <td>{{ c.description || '—' }}</td>
               <td>
-                <div class="actions-cell">
+                <div v-if="authStore.isMaker || authStore.isAdmin" class="actions-cell">
                   <button class="btn btn-ghost btn-sm" @click="openEditModal(c)" title="Sửa">✏️</button>
                   <button class="btn btn-ghost btn-sm" @click="handleSetDefault(c)" title="Đặt mặc định" :disabled="c.isDefault === 'Y'">⭐</button>
                   <button class="btn btn-ghost btn-sm" @click="handleDelete(c)" title="Xóa">🗑️</button>
                 </div>
+                <div v-else class="text-muted small">Chỉ xem</div>
               </td>
             </tr>
             <tr v-if="filteredContacts.length === 0">
@@ -151,9 +152,11 @@
 <script setup>
 import { ref, computed, reactive, onMounted } from 'vue'
 import { useCustomerContactStore } from '@/stores/customerContact'
+import { useAuthStore } from '@/stores/auth'
 import { addTypeLabels } from '../data/mockData'
 
 const contactStore = useCustomerContactStore()
+const authStore = useAuthStore()
 const search = ref('')
 const filterType = ref('')
 const showModal = ref(false)

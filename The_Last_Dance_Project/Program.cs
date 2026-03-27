@@ -1,16 +1,17 @@
+using FluentValidation;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System.Text;
-using FluentValidation;
-using FluentValidation.AspNetCore;
+using System.Text.Json.Serialization;
 using The_Last_Dance_Project.Data;
 using The_Last_Dance_Project.Interfaces;
 using The_Last_Dance_Project.Services;
-using FluentValidation;
-using FluentValidation.AspNetCore;
-using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +25,12 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.WriteIndented = true; // optional
+    });
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<The_Last_Dance_Project.Validators.RegisterRequestValidator>();
 builder.Services.AddEndpointsApiExplorer();
