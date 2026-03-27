@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using The_Last_Dance_Project.Data;
 using The_Last_Dance_Project.Interfaces;
 using The_Last_Dance_Project.Services;
@@ -24,6 +26,7 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<ICustomerContactService, CustomerContactService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<ISystemCodeService, SystemCodeService>();
+builder.Services.AddScoped<IImportExportService, ImportExportService>();
 
 builder.Services.AddAuthentication(options =>
 {
