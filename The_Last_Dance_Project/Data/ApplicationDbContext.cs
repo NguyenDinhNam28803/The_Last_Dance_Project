@@ -36,6 +36,7 @@ namespace The_Last_Dance_Project.Data
                 entity.HasKey(e => e.RoleId);
                 entity.HasData(
                     new Role { RoleId = "MAKER", Name = "Maker", Description = "Create and modify requests" },
+                    new Role { RoleId = "USER", Name = "User", Description = "User account" },
                     new Role { RoleId = "CHECKER", Name = "Checker", Description = "Approve or reject requests" },
                     new Role { RoleId = "ADMIN", Name = "Admin", Description = "Approve or reject requests and Manage System" }
                 );

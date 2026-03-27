@@ -103,7 +103,7 @@ namespace The_Last_Dance_Project.Services
                     PhoneNumber = phoneNumber,
                     RecordStatus = "1",
                     Status = "Active",
-                    RoleId = "ADMIN",
+                    RoleId = "USER",
                     CreatedDate = DateTime.UtcNow
                 };
 
