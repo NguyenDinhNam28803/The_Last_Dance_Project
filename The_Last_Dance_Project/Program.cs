@@ -8,13 +8,36 @@ using The_Last_Dance_Project.Interfaces;
 using The_Last_Dance_Project.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Cấu hình Serilog
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<The_Last_Dance_Project.Validators.RegisterRequestValidator>();
 builder.Services.AddEndpointsApiExplorer();
+
+// Cấu hình CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        });
+});
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -44,6 +67,19 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["JwtSettings:Audience"] ?? "LastDanceUsers",
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"] ?? "Key_Bi_Mat_Mac_Dinh_Sieu_Dai_1234567890"))
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = async context =>
+        {
+            var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthInterface>();
+            var token = context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            if (await authService.IsTokenBlacklisted(token))
+            {
+                context.Fail("Token is blacklisted");
+            }
+        }
     };
 });
 
@@ -78,6 +114,8 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+
+app.UseCors("AllowAll");
 
 if (app.Environment.IsDevelopment())
 {

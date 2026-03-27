@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using The_Last_Dance_Project.Data;
 using The_Last_Dance_Project.Dtos;
+using The_Last_Dance_Project.Interfaces;
 using The_Last_Dance_Project.Models;
 
 namespace The_Last_Dance_Project.Services
@@ -17,75 +18,46 @@ namespace The_Last_Dance_Project.Services
             _db = db;
         }
 
-        public async Task<IEnumerable<CustomerContactDto>> GetAllAsync()
+        private CustomerContactDto MapToDto(CustomerContact c)
         {
-            return await _db.CustomerContacts
-                .AsNoTracking()
-                .Select(cc => new CustomerContactDto
-                {
-                    ContactId = cc.ContactId,
-                    CustId = cc.CustId,
-                    CountryId = cc.CountryId,
-                    AddType = cc.AddType,
-                    InfoType = cc.InfoType,
-                    Contact = cc.Contact,
-                    FaxAttention = cc.FaxAttention,
-                    IsDefault = cc.IsDefault,
-                    Description = cc.Description
-                })
-                .ToListAsync();
-        }
-
-        public async Task<CustomerContactDto?> GetByIdAsync(string contactId)
-        {
-            var cc = await _db.CustomerContacts.FindAsync(contactId);
-            if (cc == null) return null;
-
             return new CustomerContactDto
             {
-                ContactId = cc.ContactId,
-                CustId = cc.CustId,
-                CountryId = cc.CountryId,
-                AddType = cc.AddType,
-                InfoType = cc.InfoType,
-                Contact = cc.Contact,
-                FaxAttention = cc.FaxAttention,
-                IsDefault = cc.IsDefault,
-                Description = cc.Description
+                ContactId = c.ContactId,
+                CustId = c.CustId,
+                CountryId = c.CountryId,
+                AddType = c.AddType,
+                InfoType = c.InfoType,
+                Contact = c.Contact,
+                FaxAttention = c.FaxAttention,
+                IsDefault = c.IsDefault,
+                Description = c.Description
             };
+        }
+
+        public async Task<IEnumerable<CustomerContactDto>> GetAllAsync()
+        {
+            var contacts = await _db.CustomerContacts.AsNoTracking().ToListAsync();
+            return contacts.Select(MapToDto);
+        }
+
+        public async Task<CustomerContactDto?> GetByIdAsync(string id)
+        {
+            var contact = await _db.CustomerContacts.FindAsync(id);
+            return contact != null ? MapToDto(contact) : null;
         }
 
         public async Task<IEnumerable<CustomerContactDto>> GetByCustomerIdAsync(string custId)
         {
-            return await _db.CustomerContacts
+            var contacts = await _db.CustomerContacts
+                .Where(c => c.CustId == custId)
                 .AsNoTracking()
-                .Where(cc => cc.CustId == custId)
-                .Select(cc => new CustomerContactDto
-                {
-                    ContactId = cc.ContactId,
-                    CustId = cc.CustId,
-                    CountryId = cc.CountryId,
-                    AddType = cc.AddType,
-                    InfoType = cc.InfoType,
-                    Contact = cc.Contact,
-                    FaxAttention = cc.FaxAttention,
-                    IsDefault = cc.IsDefault,
-                    Description = cc.Description
-                })
                 .ToListAsync();
+            return contacts.Select(MapToDto);
         }
 
-        public async Task<bool> CreateAsync(CustomerContactCreateDto dto)
+        public async Task<CustomerContactDto> CreateAsync(CustomerContactCreateDto dto)
         {
-            // Kiểm tra khách hàng có tồn tại không
-            var customerExists = await _db.Customers.AnyAsync(c => c.CustId == dto.CustId);
-            if (!customerExists) return false;
-
-            // Kiểm tra xem ContactId đã tồn tại chưa
-            var contactExists = await _db.CustomerContacts.AnyAsync(cc => cc.ContactId == dto.ContactId);
-            if (contactExists) return false;
-
-            var newContact = new CustomerContact
+            var contact = new CustomerContact
             {
                 ContactId = dto.ContactId,
                 CustId = dto.CustId,
@@ -98,26 +70,15 @@ namespace The_Last_Dance_Project.Services
                 Description = dto.Description
             };
 
-            // Nếu đặt là mặc định, reset các liên hệ khác cùng loại của khách hàng này
-            if (newContact.IsDefault == "Y")
-            {
-                await ResetDefaultContacts(newContact.CustId, newContact.AddType);
-            }
-
-            _db.CustomerContacts.Add(newContact);
-            return await _db.SaveChangesAsync() > 0;
+            _db.CustomerContacts.Add(contact);
+            await _db.SaveChangesAsync();
+            return MapToDto(contact);
         }
 
-        public async Task<bool> UpdateAsync(string contactId, CustomerContactUpdateDto dto)
+        public async Task<CustomerContactDto?> UpdateAsync(string id, CustomerContactUpdateDto dto)
         {
-            var existing = await _db.CustomerContacts.FindAsync(contactId);
-            if (existing == null) return false;
-
-            // Nếu thay đổi sang mặc định, reset các liên hệ khác
-            if (dto.IsDefault == "Y" && existing.IsDefault == "N")
-            {
-                await ResetDefaultContacts(existing.CustId, dto.AddType);
-            }
+            var existing = await _db.CustomerContacts.FindAsync(id);
+            if (existing == null) return null;
 
             existing.CountryId = dto.CountryId;
             existing.AddType = dto.AddType;
@@ -127,39 +88,36 @@ namespace The_Last_Dance_Project.Services
             existing.IsDefault = dto.IsDefault;
             existing.Description = dto.Description;
 
-            return await _db.SaveChangesAsync() > 0;
+            await _db.SaveChangesAsync();
+            return MapToDto(existing);
         }
 
-        public async Task<bool> DeleteAsync(string contactId)
+        public async Task<bool> DeleteAsync(string id)
         {
-            var existing = await _db.CustomerContacts.FindAsync(contactId);
+            var existing = await _db.CustomerContacts.FindAsync(id);
             if (existing == null) return false;
 
             _db.CustomerContacts.Remove(existing);
             return await _db.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> SetDefaultContactAsync(string contactId)
+        public async Task<bool> SetDefaultAsync(string id)
         {
-            var contact = await _db.CustomerContacts.FindAsync(contactId);
-            if (contact == null) return false;
+            var target = await _db.CustomerContacts.FindAsync(id);
+            if (target == null) return false;
 
-            await ResetDefaultContacts(contact.CustId, contact.AddType);
-            contact.IsDefault = "Y";
-
-            return await _db.SaveChangesAsync() > 0;
-        }
-
-        private async Task ResetDefaultContacts(string custId, string addType)
-        {
-            var defaults = await _db.CustomerContacts
-                .Where(cc => cc.CustId == custId && cc.AddType == addType && cc.IsDefault == "Y")
+            // Reset other defaults for the same customer and same AddType
+            var otherDefaults = await _db.CustomerContacts
+                .Where(c => c.CustId == target.CustId && c.AddType == target.AddType && c.IsDefault == "Y")
                 .ToListAsync();
 
-            foreach (var d in defaults)
+            foreach (var item in otherDefaults)
             {
-                d.IsDefault = "N";
+                item.IsDefault = "N";
             }
+
+            target.IsDefault = "Y";
+            return await _db.SaveChangesAsync() > 0;
         }
     }
 }
