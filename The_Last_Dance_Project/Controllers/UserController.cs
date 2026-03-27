@@ -18,9 +18,9 @@ namespace The_Last_Dance_Project.Controllers
             _userService = userService;
         }
 
-        // Lấy danh sách người dùng - Chỉ ADMIN
+        // Lấy danh sách người dùng - Chỉ Administrator
         [HttpGet]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetAll()
         {
             var users = await _userService.GetUserManagementListAsync();
@@ -31,11 +31,11 @@ namespace The_Last_Dance_Project.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
         {
-            // Kiểm tra quyền: Admin hoặc chính chủ mới được xem
+            // Kiểm tra quyền: Administrator hoặc chính chủ mới được xem
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
 
-            if (currentUserRole != "ADMIN" && currentUserId != id)
+            if (currentUserRole != "Administrator" && currentUserId != id)
             {
                 return Forbid("Bạn không có quyền xem thông tin người dùng khác.");
             }
@@ -45,9 +45,9 @@ namespace The_Last_Dance_Project.Controllers
             return Ok(user);
         }
 
-        // Admin tạo User mới
+        // Administrator tạo User mới
         [HttpPost]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Create([FromBody] UserCreateDto dto)
         {
             var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "SYSTEM";
@@ -56,9 +56,9 @@ namespace The_Last_Dance_Project.Controllers
             return Ok("Tạo người dùng thành công.");
         }
 
-        // Admin cập nhật thông tin User
+        // Administrator cập nhật thông tin User
         [HttpPut("{id}")]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Update(string id, [FromBody] UserUpdateDto dto)
         {
             var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "SYSTEM";
@@ -67,9 +67,9 @@ namespace The_Last_Dance_Project.Controllers
             return Ok("Cập nhật thành công.");
         }
 
-        // Admin đổi Role
+        // Administrator đổi Role
         [HttpPatch("{id}/role")]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> ChangeRole(string id, [FromBody] ChangeRoleDto dto)
         {
             var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "SYSTEM";
@@ -78,9 +78,9 @@ namespace The_Last_Dance_Project.Controllers
             return Ok("Thay đổi vai trò thành công.");
         }
 
-        // Admin bật/tắt trạng thái
+        // Administrator bật/tắt trạng thái
         [HttpPatch("{id}/toggle-status")]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> ToggleStatus(string id)
         {
             var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "SYSTEM";

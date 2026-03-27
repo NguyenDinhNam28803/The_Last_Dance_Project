@@ -46,6 +46,36 @@ namespace The_Last_Dance_Project.Data
                 entity.ToTable("MTTRAN");
                 entity.HasKey(e => e.MtTranId);
                 entity.Property(e => e.MtTranId).UseIdentityColumn();
+
+                // Seed sample audit header records for visualization
+                entity.HasData(
+                    new AuditEntity {
+                        MtTranId = 1001L,
+                        ObjChange = "Customer",
+                        BusDate = new DateTime(2026, 3, 27),
+                        ActionDate = new DateTime(2026, 3, 27, 12, 0, 0),
+                        ModCode = "CUST",
+                        KeyField = "CustId",
+                        KeyValue = "ACC_MAKER_001",
+                        MtlStatus = "A",
+                        MtlType = "A",
+                        Description = "Tạo tài khoản maker_system",
+                        Maker = "maker_system"
+                    },
+                    new AuditEntity {
+                        MtTranId = 1002L,
+                        ObjChange = "Account",
+                        BusDate = new DateTime(2026, 3, 27),
+                        ActionDate = new DateTime(2026, 3, 27, 12, 5, 0),
+                        ModCode = "ACC",
+                        KeyField = "AccId",
+                        KeyValue = "ACC_0001",
+                        MtlStatus = "A",
+                        MtlType = "C",
+                        Description = "Tạo tài khoản",
+                        Maker = "maker_system"
+                    }
+                );
             });
 
             // Cấu hình bảng AuditEntityKey (Chi tiết log)
@@ -55,10 +85,42 @@ namespace The_Last_Dance_Project.Data
                 entity.Property(e => e.MtTranFldId).UseIdentityColumn();
 
                 // Khóa ngoại liên kết tới AuditEntity (MTTRAN)
+                // Bổ sung navigation property trên AuditEntity: Keys
                 entity.HasOne<AuditEntity>()
-                    .WithMany()
+                    .WithMany(a => a.Keys)
                     .HasForeignKey(d => d.MtTranId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                // Seed sample audit detail records
+                entity.HasData(
+                    new AuditEntityKey {
+                        MtTranFldId = 2001L,
+                        MtTranId = 1001L,
+                        ColumnName = "NAME",
+                        DisplayName = "Tên",
+                        NewVal = "Maker System Account",
+                        TableName = "CUSTOMER",
+                        TabName = "Thông tin khách hàng"
+                    },
+                    new AuditEntityKey {
+                        MtTranFldId = 2002L,
+                        MtTranId = 1001L,
+                        ColumnName = "EMAIL",
+                        DisplayName = "Email",
+                        NewVal = "maker_sys@test.com",
+                        TableName = "CUSTOMER",
+                        TabName = "Thông tin khách hàng"
+                    },
+                    new AuditEntityKey {
+                        MtTranFldId = 2003L,
+                        MtTranId = 1002L,
+                        ColumnName = "STATUS",
+                        DisplayName = "Trạng thái",
+                        NewVal = "Active",
+                        TableName = "ACCOUNT",
+                        TabName = "Thông tin tài khoản"
+                    }
+                );
             });
 
             // Cấu hình định nghĩa Audit
@@ -66,6 +128,13 @@ namespace The_Last_Dance_Project.Data
                 entity.ToTable("AUDITENTITY_KEY_DEFINITION");
                 entity.HasKey(e => e.DefId);
                 entity.Property(e => e.DefId).UseIdentityColumn();
+
+                // Seed some definitions for common columns
+                entity.HasData(
+                    new AuditEntityKeyDefinition { DefId = 1, TableName = "CUSTOMER", ColumnName = "NAME", DisplayName = "Tên", IsCompare = "Y", DataType = "VARCHAR2" },
+                    new AuditEntityKeyDefinition { DefId = 2, TableName = "CUSTOMER", ColumnName = "EMAIL", DisplayName = "Email", IsCompare = "Y", DataType = "VARCHAR2" },
+                    new AuditEntityKeyDefinition { DefId = 3, TableName = "ACCOUNT", ColumnName = "STATUS", DisplayName = "Trạng thái", IsCompare = "Y", DataType = "VARCHAR2" }
+                );
             });
 
             // Cấu hình quan hệ SystemCode và SystemCodeValue

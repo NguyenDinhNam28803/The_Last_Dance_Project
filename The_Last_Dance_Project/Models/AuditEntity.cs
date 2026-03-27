@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace The_Last_Dance_Project.Models
@@ -78,5 +80,8 @@ namespace The_Last_Dance_Project.Models
         [StringLength(50)]
         [Column("CHKWSNAME")]
         public string? ChkWsName { get; set; } // Tên máy duyệt giao dịch
+
+        // Navigation: danh sách các trường chi tiết của bản ghi audit
+        public List<AuditEntityKey> Keys { get; set; } = new();
     }
 }
