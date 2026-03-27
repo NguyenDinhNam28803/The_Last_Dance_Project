@@ -71,16 +71,24 @@ namespace The_Last_Dance_Project.Services
 
         public async Task<byte[]> ExportCustomersAsync()
         {
-            var customers = await _db.Customers.AsNoTracking().ToListAsync();
+            var customers = await _db.Customers
+                .AsNoTracking()
+                .ToListAsync();
+
+            var customerContacts = await _db.CustomerContacts
+                .AsNoTracking()
+                .ToListAsync();
 
             using var package = new ExcelPackage();
             var worksheet = package.Workbook.Worksheets.Add("Customers");
 
-            // Define Headers
+            // Define Headers (Trùng với Template 18 cột)
             var headers = new[]
             {
                 "Client ID", "Name", "Date Of Birth", "Sex", "Registration Type",
-                "ID Type", "ID Number", "Nationality", "Email", "Status", "Open Date"
+                "ID Type", "ID Number", "Issued Date", "Issued Place", "ID Expiry Date",
+                "Address/Home", "Nationality", "Email", "Fax", "Home Tel", "Office Tel",
+                "Mobile Tel", "Creation Method"
             };
 
             for (int i = 0; i < headers.Length; i++)
@@ -95,21 +103,33 @@ namespace The_Last_Dance_Project.Services
             }
 
             // Đổ dữ liệu
-            int row = 2;
+            int rowNumber = 2;
             foreach (var c in customers)
             {
-                worksheet.Cells[row, 1].Value = c.CustId;
-                worksheet.Cells[row, 2].Value = c.Name;
-                worksheet.Cells[row, 3].Value = c.DateOfBirth;
-                worksheet.Cells[row, 4].Value = c.Gender;
-                worksheet.Cells[row, 5].Value = c.RegistrationType;
-                worksheet.Cells[row, 6].Value = c.InstitutionTypeId; // Giả sử dùng tạm làm IdType
-                worksheet.Cells[row, 7].Value = c.InvestorCode;      // Giả sử dùng tạm làm IdNum
-                worksheet.Cells[row, 8].Value = c.Nationality;
-                worksheet.Cells[row, 9].Value = c.Email;
-                worksheet.Cells[row, 10].Value = c.Status;
-                worksheet.Cells[row, 11].Value = c.OpenDate;
-                row++;
+                var contacts = customerContacts.Where(x => x.CustId == c.CustId).ToList();
+                var homeAddress = contacts.FirstOrDefault(x => x.AddType == "A" && x.InfoType == "HOM")?.Contact;
+                var mobileTel = contacts.FirstOrDefault(x => (x.AddType == "S" || x.InfoType == "MTL") && x.CustId == c.CustId)?.Contact;
+
+                worksheet.Cells[rowNumber, 1].Value = c.CustId;
+                worksheet.Cells[rowNumber, 2].Value = c.Name;
+                worksheet.Cells[rowNumber, 3].Value = c.DateOfBirth;
+                worksheet.Cells[rowNumber, 4].Value = c.Gender;
+                worksheet.Cells[rowNumber, 5].Value = c.RegistrationType;
+                worksheet.Cells[rowNumber, 6].Value = c.InstitutionTypeId;
+                worksheet.Cells[rowNumber, 7].Value = c.InvestorCode;
+                worksheet.Cells[rowNumber, 8].Value = ""; // Issued Date (Chưa có trong Model)
+                worksheet.Cells[rowNumber, 9].Value = ""; // Issued Place (Chưa có trong Model)
+                worksheet.Cells[rowNumber, 10].Value = ""; // ID Expiry Date (Chưa có trong Model)
+                worksheet.Cells[rowNumber, 11].Value = homeAddress ?? "";
+                worksheet.Cells[rowNumber, 12].Value = c.Nationality;
+                worksheet.Cells[rowNumber, 13].Value = c.Email;
+                worksheet.Cells[rowNumber, 14].Value = ""; // Fax
+                worksheet.Cells[rowNumber, 15].Value = ""; // Home Tel
+                worksheet.Cells[rowNumber, 16].Value = ""; // Office Tel
+                worksheet.Cells[rowNumber, 17].Value = mobileTel ?? c.PhoneNumber;
+                worksheet.Cells[rowNumber, 18].Value = "1"; // Creation Method
+
+                rowNumber++;
             }
 
             worksheet.Cells.AutoFitColumns();
@@ -179,6 +199,20 @@ namespace The_Last_Dance_Project.Services
                     result.FailCount++;
                     result.Errors.Add(new ImportRowErrorDto { RowNumber = row, ClientId = clientId, Reason = "Client ID đã tồn tại trên hệ thống." });
                     continue;
+                }
+
+                // 5. Kiểm tra định dạng ngày tháng (DateOfBirth - Cột 3)
+                var dobText = worksheet.Cells[row, 3].Text?.Trim();
+                if (!string.IsNullOrEmpty(dobText))
+                {
+                    // Các định dạng phổ biến
+                    string[] formats = { "dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd-MM-yyyy" };
+                    if (!DateTime.TryParseExact(dobText, formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out _))
+                    {
+                        result.FailCount++;
+                        result.Errors.Add(new ImportRowErrorDto { RowNumber = row, ClientId = clientId, Reason = $"Định dạng ngày sinh không hợp lệ: '{dobText}'. Vui lòng sử dụng dd/MM/yyyy." });
+                        continue;
+                    }
                 }
 
                 try
