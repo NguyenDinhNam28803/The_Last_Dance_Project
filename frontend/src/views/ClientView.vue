@@ -8,7 +8,8 @@
         :features="toolbarFeatures"
         @action="handleToolbarAction"
       />
-
+      
+      <!-- Loading State -->
       <div v-if="clientStore.loading" class="text-center p-4">Đang tải...</div>
 
       <div v-else :style="selectedIds.length > 1 ? 'opacity: 0.4; pointer-events: none; filter: grayscale(100%);' : ''">
@@ -293,9 +294,6 @@ import Toolbar from '@/components/common/Toolbar.vue'
 import ValidationInput from '@/components/common/ValidationInput.vue'
 import { useClientStore } from '@/stores/client'
 import { useAuthStore } from '@/stores/auth'
-import { useCustomerContactStore } from '@/stores/customerContact'
-import { addTypeLabels } from '@/data/mockData'
-import { useNotify } from '@/composables/useNotify'
 
 const clientStore = useClientStore()
 const authStore = useAuthStore()
@@ -311,6 +309,7 @@ const mode = ref('view')
 const selectedIds = ref([])
 const formData = ref({})
 const errors = ref({})
+const contacts = ref([])
 
 onMounted(() => clientStore.fetchAll())
 
@@ -359,8 +358,11 @@ const validate = () => {
 
 const toolbarFeatures = computed(() => {
   if (mode.value === 'add' || mode.value === 'edit') return ['Save', 'Cancel']
+  
   const base = ['Search']
-  if (authStore.isMaker || authStore.isAdmin) base.push('Add', 'Edit', 'Delete')
+  if (authStore.isMaker || authStore.isAdmin) {
+    base.push('Add', 'Edit', 'Delete')
+  }
   return base
 })
 
@@ -384,27 +386,18 @@ const handleToolbarAction = async (action) => {
   } else if (action === 'save') {
     if (!validate()) return
     try {
-      // Loại bỏ field display-only trước khi gửi
-      const { createdDateDisplay, ...payload } = formData.value
-      if (mode.value === 'add') await clientStore.create(payload)
-      else await clientStore.update(formData.value.custId, payload)
-      mode.value = 'view'
-      await clientStore.fetchAll()
-    } catch {
-      alert('Lưu thất bại, vui lòng thử lại.')
-    }
-  } else if (action === 'delete') {
-    if (!formData.value.custId) return
-    if (!confirm(`Xóa khách hàng "${formData.value.userName}"?`)) return
-    try {
-      await clientStore.delete(formData.value.custId)
-      formData.value = {}
-      selectedIds.value = []
-      await clientStore.fetchAll()
-    } catch {
-      alert('Xóa thất bại.')
-    }
+        if (mode.value === 'add') await clientStore.create(formData.value)
+        else await clientStore.update(formData.value.clientId, formData.value)
+        alert('Lưu thành công!')
+        mode.value = 'view'
+        await clientStore.fetchAll()
+    } catch (e) { alert('Lỗi') }
   }
+}
+
+const selectClient = (cli) => {
+  formData.value = { ...cli }
+  contacts.value = cli.contacts || []
 }
 </script>
 
