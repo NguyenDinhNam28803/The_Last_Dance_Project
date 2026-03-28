@@ -33,7 +33,7 @@ namespace The_Last_Dance_Project.Controllers
 
         [HttpPost("import-customers")]
         // Chỉ Maker (hoặc Admin) mới được phép Import
-        [Authorize(Roles = "Administrator,Maker")]
+        [Authorize(Roles = "ADMIN,MAKER")]
         public async Task<IActionResult> ImportCustomers(IFormFile file)
         {
             if (file == null || file.Length == 0)
