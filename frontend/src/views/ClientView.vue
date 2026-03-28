@@ -8,6 +8,7 @@
         :features="toolbarFeatures" 
         @action="handleToolbarAction" 
       />
+      <input type="file" ref="fileInput" hidden accept=".xlsx, .xls" @change="handleFileUpload" />
       
       <!-- Loading State -->
       <div v-if="clientStore.loading" class="text-center p-4">Đang tải...</div>
@@ -83,6 +84,7 @@ import Toolbar from '@/components/common/Toolbar.vue'
 import ValidationInput from '@/components/common/ValidationInput.vue'
 import { useClientStore } from '@/stores/client'
 import { useAuthStore } from '@/stores/auth'
+import { ImportExportService } from '@/services/api'
 
 const clientStore = useClientStore()
 const authStore = useAuthStore()
@@ -94,15 +96,16 @@ const selectedIds = ref([])
 const formData = ref({})
 const errors = ref({})
 const contacts = ref([])
+const fileInput = ref(null)
 
 onMounted(() => clientStore.fetchAll())
 
 const toolbarFeatures = computed(() => {
   if (mode.value === 'add' || mode.value === 'edit') return ['Save', 'Cancel']
   
-  const base = ['Search']
+  const base = ['Search', 'Template', 'Export']
   if (authStore.isMaker || authStore.isAdmin) {
-    base.push('Add', 'Edit', 'Delete')
+    base.push('Add', 'Edit', 'Delete', 'Import')
   }
   return base
 })
@@ -119,6 +122,70 @@ const handleToolbarAction = async (action) => {
         mode.value = 'view'
         await clientStore.fetchAll()
     } catch (e) { alert('Lỗi') }
+  } else if (action === 'export') {
+    await exportExcel()
+  } else if (action === 'import') {
+    fileInput.value.click()
+  } else if (action === 'template') {
+    await downloadTemplate()
+  }
+}
+
+const downloadTemplate = async () => {
+  try {
+    const response = await ImportExportService.getTemplate()
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', 'Template_Import_Client.xlsx')
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+  } catch (error) {
+    console.error("Lỗi tải template", error)
+    alert('Lỗi khi tải template!')
+  }
+}
+
+const exportExcel = async () => {
+  try {
+    const response = await ImportExportService.exportCustomers()
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    const dateStr = new Date().toISOString().replace(/[:.]/g, '')
+    link.setAttribute('download', `Customers_Export_${dateStr}.xlsx`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+  } catch (error) {
+    console.error("Lỗi tải file excel", error)
+    alert('Lỗi khi xuất file Excel!')
+  }
+}
+
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  const formData = new FormData()
+  formData.append('file', file)
+
+  try {
+    const res = await ImportExportService.importCustomers(formData)
+    alert(`Import thành công: ${res.data.successCount} dòng.\nThất bại: ${res.data.failCount} dòng.`)
+    await clientStore.fetchAll() // Reload lại danh sách
+  } catch (error) {
+    console.error("Lỗi import file", error)
+    // Hiển thị chi tiết lỗi nếu có từ server
+    if (error.response?.data?.errors?.length > 0) {
+      const errMsgs = error.response.data.errors.map(e => `Dòng ${e.rowNumber}: ${e.reason}`).join('\n')
+      alert(`Import gặp lôi:\n${errMsgs}`)
+    } else {
+      alert(error.response?.data || 'Lỗi khi import file Excel!')
+    }
+  } finally {
+    event.target.value = null // reset input để cho phép chọn lại cùng 1 file
   }
 }
 
