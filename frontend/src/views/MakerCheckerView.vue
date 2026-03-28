@@ -104,8 +104,10 @@ import Toolbar from '@/components/common/Toolbar.vue'
 import ValidationInput from '@/components/common/ValidationInput.vue'
 import { MakerCheckerService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
+import { useNotify } from '@/composables/useNotify'
 
 const authStore = useAuthStore()
+const notify = useNotify()
 const requests = ref([])
 const loading = ref(false)
 const filters = ref({ transId: '', type: '' })
@@ -134,7 +136,8 @@ const fetchRequests = async () => {
     requests.value = response.data
     selectedIds.value = []
   } catch (err) {
-    showToast('Không thể tải danh sách chờ duyệt', 'error')
+    console.error(err)
+    notify.error('Không thể tải danh sách chờ duyệt')
   } finally {
     loading.value = false
   }
@@ -168,8 +171,8 @@ const toggleSelection = (id) => {
 const handleAction = async (action) => {
   if (action === 'refresh') {
     await fetchRequests()
-  } else if (action === 'cancel') {
-    if (selectedIds.value.length === 0) return alert('Vui lòng chọn ít nhất 1 bản ghi để Hủy!')
+    if (action === 'cancel') {
+    if (selectedIds.value.length === 0) return notify.warn('Vui lòng chọn ít nhất 1 bản ghi để Hủy!')
     
     // Validate: Chỉ có thể hủy những bản ghi do mình tạo ra (hoặc Admin có thể hủy tất cả)
     const myRequests = requests.value.filter(r => selectedIds.value.includes(r.mtTranId) && r.maker === authStore.user?.id)
@@ -187,11 +190,11 @@ const handleAction = async (action) => {
           console.error(`Lỗi khi hủy ID ${id}:`, err)
         }
       }
-      showToast(`Đã hủy thành công ${successCount} yêu cầu.`, 'success')
+      notify.success(`Đã hủy thành công ${successCount} yêu cầu.`)
       await fetchRequests()
     }
   } else if (action === 'approve') {
-    if (selectedIds.value.length === 0) return alert('Vui lòng chọn ít nhất 1 bản ghi để Duyệt!')
+    if (selectedIds.value.length === 0) return notify.warn('Vui lòng chọn ít nhất 1 bản ghi để Duyệt!')
     
     // Validate: Không được duyệt giao dịch của chính mình (Maker != Checker)
     const ownRequests = requests.value.filter(r => selectedIds.value.includes(r.mtTranId) && r.maker === authStore.user?.id)
@@ -209,16 +212,16 @@ const handleAction = async (action) => {
           console.error(`Lỗi khi duyệt ID ${id}:`, err)
         }
       }
-      showToast(`Đã duyệt thành công ${successCount} yêu cầu.`, 'success')
+      notify.success(`Đã duyệt thành công ${successCount} yêu cầu.`)
       await fetchRequests()
     }
   } else if (action === 'reject') {
-    if (selectedIds.value.length === 0) return alert('Vui lòng chọn ít nhất 1 bản ghi để Từ chối!')
+    if (selectedIds.value.length === 0) return notify.warn('Vui lòng chọn ít nhất 1 bản ghi để Từ chối!')
     
     // Validate: Không được từ chối giao dịch của chính mình
     const ownRequests = requests.value.filter(r => selectedIds.value.includes(r.mtTranId) && r.maker === authStore.user?.id)
     if (ownRequests.length > 0 && !authStore.isAdmin) {
-      return alert('Bạn không thể TỪ CHỐI yêu cầu do chính mình tạo ra! Vui lòng sử dụng tính năng Hủy.')
+      return notify.warn('Bạn không thể TỪ CHỐI yêu cầu do chính mình tạo ra! Vui lòng sử dụng tính năng Hủy.')
     }
 
     rejectReason.value = ''
@@ -244,7 +247,7 @@ const confirmReject = async () => {
   }
   
   showRejectModal.value = false
-  showToast(`Đã từ chối ${successCount} yêu cầu.`, 'success')
+  notify.success(`Đã từ chối ${successCount} yêu cầu.`)
   await fetchRequests()
 }
 

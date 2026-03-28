@@ -49,6 +49,15 @@ export const UserService = {
   toggleStatus: (id) => api.patch(`/User/${id}/toggle-status`)
 }
 
+// Client endpoints grouped here so stores/components can import a single service
+export const ClientService = {
+  getAll: () => api.get('/User/Client'),
+  getById: (id) => api.get(`/User/Client/${id}`),
+  create: (dto) => api.post('/User/Client', dto),
+  update: (id, dto) => api.put(`/User/Client/${id}`, dto),
+  delete: (id) => api.delete(`/User/Client/${id}`)
+}
+
 export const CustomerContactService = {
   getAll: () => api.get('/CustomerContact'),
   getById: (id) => api.get(`/CustomerContact/${id}`),

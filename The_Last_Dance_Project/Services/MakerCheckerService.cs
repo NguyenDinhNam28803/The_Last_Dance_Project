@@ -43,7 +43,75 @@ namespace The_Last_Dance_Project.Services
             };
 
             _db.AuditEntities.Add(auditEntity);
-            return await _db.SaveChangesAsync() > 0;
+            var saved = await _db.SaveChangesAsync() > 0;
+
+            if (!saved) return false;
+
+            // After saving header, create audit detail rows if details is JSON representing fields
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(details))
+                {
+                    // Try parse as JSON object
+                    using var doc = System.Text.Json.JsonDocument.Parse(details);
+                    if (doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Object)
+                    {
+                        var detailEntities = new List<AuditEntityKey>();
+
+                        // If this is UPDATE for CustomerContact try to capture old values
+                        Dictionary<string, string?> oldValues = new();
+                        if (entityName == "CustomerContact" && action == "UPDATE")
+                        {
+                            // Attempt to read id from json
+                            if (doc.RootElement.TryGetProperty("ContactId", out var contactIdProp))
+                            {
+                                var contactId = contactIdProp.GetString();
+                                if (!string.IsNullOrEmpty(contactId))
+                                {
+                                    var existing = await _db.CustomerContacts.FindAsync(contactId);
+                                    if (existing != null)
+                                    {
+                                        // capture existing property values as strings
+                                        oldValues = existing.GetType()
+                                            .GetProperties()
+                                            .ToDictionary(p => p.Name, p => p.GetValue(existing)?.ToString());
+                                    }
+                                }
+                            }
+                        }
+
+                        foreach (var prop in doc.RootElement.EnumerateObject())
+                        {
+                            var col = prop.Name;
+                            var newVal = prop.Value.ValueKind == System.Text.Json.JsonValueKind.Null ? null : prop.Value.ToString();
+                            oldValues.TryGetValue(col, out var oldVal);
+
+                            detailEntities.Add(new AuditEntityKey
+                            {
+                                MtTranId = auditEntity.MtTranId,
+                                ColumnName = col,
+                                DisplayName = col,
+                                NewVal = newVal,
+                                OldVal = oldVal,
+                                TableName = entityName.ToUpper(),
+                                TabName = entityName
+                            });
+                        }
+
+                        if (detailEntities.Count > 0)
+                        {
+                            _db.AuditEntityKeys.AddRange(detailEntities);
+                            await _db.SaveChangesAsync();
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Non-fatal: if detail parsing fails, header still exists. Do not throw.
+            }
+
+            return true;
         }
 
         // MAKER: Hủy yêu cầu của chính mình

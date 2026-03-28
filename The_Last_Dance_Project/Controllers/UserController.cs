@@ -88,6 +88,15 @@ namespace The_Last_Dance_Project.Controllers
             if (!success) return NotFound("Không tìm thấy người dùng.");
             return Ok("Thay đổi trạng thái thành công.");
         }
+
+        // Lấy danh sách khách hàng có Role = "USER"
+        [HttpGet("Client")]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> GetUsersWithRoleUser()
+        {
+            var users = await _userService.GetUsersWithRoleUserAsync();
+            return Ok(users);
+        }
     }
 }
 

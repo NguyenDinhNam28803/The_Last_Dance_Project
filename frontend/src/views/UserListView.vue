@@ -12,9 +12,10 @@
         </div>
         <div class="toolbar">
           <template v-if="mode === 'view'">
-            <button class="tbtn primary"   @click="startAdd">    <i class="fas fa-plus"></i>    Thêm   </button>
-            <button class="tbtn outline"   @click="startEdit"    :disabled="!selectedUser || selectedIds.length > 1"> <i class="fas fa-pencil-alt"></i> Sửa </button>
-            <button class="tbtn danger-o"  @click="confirmDelete" :disabled="selectedIds.length === 0"> <i class="fas fa-trash-alt"></i> Xoá </button>
+            <button v-if="authStore.isAdmin" class="tbtn primary"   @click="startAdd">    <i class="fas fa-plus"></i>    Thêm   </button>
+            <button v-if="authStore.isAdmin || (authStore.isAuthenticated && selectedUser && selectedUser.custId === authStore.currentUser?.id)"
+                    class="tbtn outline" @click="startEdit" :disabled="!selectedUser || selectedIds.length > 1"> <i class="fas fa-pencil-alt"></i> Sửa </button>
+            <button v-if="authStore.isAdmin" class="tbtn danger-o"  @click="confirmDelete" :disabled="selectedIds.length === 0"> <i class="fas fa-trash-alt"></i> Xoá </button>
             <button class="tbtn ghost"     @click="fetchUsers">   <i class="fas fa-sync-alt"></i>        </button>
           </template>
           <template v-else>
@@ -246,17 +247,10 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useNotify } from '@/composables/useNotify'
 // import { useUserStore } from '@/stores/user'  // Uncomment khi dùng store
 
-// ── Mock data theo đúng cấu trúc API ───────────────
-const mockUsers = [
-  { custId: '14afcad6-48ae-4374-b', userName: 'Namden135',           name: 'Namden135',              nameOther: null, shortName: null, email: 'namndtb00921@fpt.edu.vn',         phoneNumber: '0808080808', roleId: 'CHECKER', roleName: null, status: 'Active',   recordStatus: '1', gender: null, dateOfBirth: null, nationality: null, residentCountryId: null, createdDate: '2026-03-27T16:06:14.9364172', createdBy: null },
-  { custId: '247cbcd2-957c-4c8d-b', userName: 'Namden789',           name: 'Namden789',              nameOther: null, shortName: null, email: 'namden@gmail.com',                phoneNumber: '0606060606', roleId: 'ADMIN',   roleName: null, status: 'Active',   recordStatus: '1', gender: null, dateOfBirth: null, nationality: null, residentCountryId: null, createdDate: '2026-03-27T16:36:33.6678712', createdBy: null },
-  { custId: '74f46864-53ce-439a-b', userName: 'Namden246',           name: 'Namden246',              nameOther: null, shortName: null, email: 'nam@gmail.com',                   phoneNumber: '0707070707', roleId: 'MAKER',   roleName: null, status: 'Active',   recordStatus: '1', gender: null, dateOfBirth: null, nationality: null, residentCountryId: null, createdDate: '2026-03-27T16:10:06.1968369', createdBy: null },
-  { custId: 'ACC_CHECKER_001',      userName: 'checker_system',      name: 'Checker System Account', nameOther: null, shortName: null, email: 'checker_sys@test.com',            phoneNumber: null,         roleId: 'CHECKER', roleName: null, status: 'Active',   recordStatus: '1', gender: null, dateOfBirth: null, nationality: null, residentCountryId: null, createdDate: '2026-03-27T00:00:00',         createdBy: null },
-  { custId: 'ACC_MAKER_001',        userName: 'maker_system',        name: 'Maker System Account',   nameOther: null, shortName: null, email: 'maker_sys@test.com',              phoneNumber: null,         roleId: 'MAKER',   roleName: null, status: 'Active',   recordStatus: '1', gender: null, dateOfBirth: null, nationality: null, residentCountryId: null, createdDate: '2026-03-27T00:00:00',         createdBy: null },
-  { custId: 'ace73354-1606-4a26-8', userName: 'Nguyendinhnam28803',  name: 'Nguyendinhnam28803',     nameOther: null, shortName: null, email: 'nguyendinhnam241209@gmail.com',   phoneNumber: '0908651852', roleId: null,      roleName: null, status: 'Active',   recordStatus: '1', gender: null, dateOfBirth: null, nationality: null, residentCountryId: null, createdDate: '2026-03-21T01:24:14.7931554', createdBy: null },
-]
+// (Real data will be loaded from API via store)
 
 // Roles lấy từ SystemCode API (ROLE)
 const roles = [
@@ -268,8 +262,14 @@ const roles = [
 ]
 
 // ── State ───────────────────────────────────────────
-const users         = ref([])
-const loading       = ref(false)
+import { useUserStore } from '@/stores/user'
+import { useAuthStore } from '@/stores/auth'
+
+const userStore = useUserStore()
+const authStore = useAuthStore()
+
+const users         = userStore.users
+const loading       = computed(() => userStore.loading)
 const mode          = ref('view')
 const selectedUser  = ref(null)
 const selectedIds   = ref([])
@@ -308,15 +308,14 @@ const sortedUsers = computed(() => {
 })
 
 // ── Fetch ───────────────────────────────────────────
+const notify = useNotify()
+
 const fetchUsers = async () => {
-  loading.value = true
   try {
-    // TODO: const res = await axios.get('/api/Customer')
-    // users.value = res.data
-    await new Promise(r => setTimeout(r, 400))
-    users.value = mockUsers
-  } finally {
-    loading.value = false
+    await userStore.fetchAll()
+  } catch (e) {
+    console.error('Error fetching users', e)
+    notify.error('Không tải được danh sách người dùng')
   }
 }
 
@@ -356,17 +355,16 @@ const saveUser = async () => {
   if (!validateForm()) return
   try {
     if (mode.value === 'add') {
-      // TODO: await axios.post('/api/Customer', formData.value)
-      users.value.push({ ...formData.value })
+      await userStore.create(formData.value)
     } else {
-      // TODO: await axios.put(`/api/Customer/${formData.value.custId}`, formData.value)
-      const idx = users.value.findIndex(u => u.custId === formData.value.custId)
-      if (idx !== -1) users.value[idx] = { ...formData.value }
+      await userStore.update(formData.value.custId, formData.value)
       selectedUser.value = { ...formData.value }
     }
     mode.value = 'view'
+    await fetchUsers()
   } catch (e) {
-    alert('Lỗi khi lưu: ' + e.message)
+    console.error(e)
+    notify.error('Lỗi khi lưu: ' + (e.message || 'Vui lòng thử lại'))
   }
 }
 
@@ -388,14 +386,17 @@ const confirmDelete = () => {
 
 const doDelete = async () => {
   try {
-    // TODO: await Promise.all(selectedIds.value.map(id => axios.delete(`/api/Customer/${id}`)))
-    users.value     = users.value.filter(u => !selectedIds.value.includes(u.custId))
+    // Backend does not expose hard-delete; toggle status for each selected user
+    await Promise.all(selectedIds.value.map(id => userStore.toggleStatus(id)))
+    // Refresh list
+    await fetchUsers()
     selectedIds.value  = []
     selectedUser.value = null
     formData.value     = {}
     showDeleteModal.value = false
   } catch (e) {
-    alert('Lỗi khi xoá: ' + e.message)
+    console.error(e)
+    notify.error('Lỗi khi xoá: ' + (e.message || 'Vui lòng thử lại'))
   }
 }
 

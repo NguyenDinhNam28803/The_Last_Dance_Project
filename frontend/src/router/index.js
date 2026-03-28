@@ -37,12 +37,14 @@ const router = createRouter({
         { 
           path: 'clients', 
           name: 'clients', 
-          component: () => import('../views/ClientView.vue') 
+          component: () => import('../views/ClientView.vue'),
+          meta: { requiresNotGuest: true }
         },
         { 
           path: 'contacts', 
           name: 'contacts', 
-          component: () => import('@/views/ContactListView.vue') 
+          component: () => import('@/views/ContactListView.vue') ,
+          meta: { requiresNotGuest: true }
         },
         { 
           path: 'audit', 
@@ -52,7 +54,8 @@ const router = createRouter({
         { 
           path: 'maker-checker', 
           name: 'maker-checker', 
-          component: () => import('@/views/MakerCheckerView.vue') 
+          component: () => import('@/views/MakerCheckerView.vue') ,
+          meta: { requiresNotGuest: true }
         },
         { 
           path: 'system-code', 
@@ -79,6 +82,9 @@ router.beforeEach((to, from, next) => {
     next('/dashboard')
   } else if (to.meta.requiresMaker && !authStore.isMaker && !authStore.isAdmin) {
     next('/dashboard')
+  } else if (to.meta.requiresNotGuest && authStore.isGuest) {
+    next('/dashboard') // Guest bị chặn khỏi route nhạy cảm
+  // highlight-end
   } else {
     next()
   }

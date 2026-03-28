@@ -15,6 +15,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAdmin = computed(() => user.value?.role?.toUpperCase() === 'ADMINISTRATOR' || user.value?.role?.toUpperCase() === 'ADMIN')
   const isMaker = computed(() => user.value?.role?.toUpperCase() === 'MAKER')
   const isChecker = computed(() => user.value?.role?.toUpperCase() === 'CHECKER')
+  const isGuest = computed(() => user.value?.role?.toUpperCase() === 'USER')
 
   async function login(credentials) {
     const data = await loginApi.execute(credentials)

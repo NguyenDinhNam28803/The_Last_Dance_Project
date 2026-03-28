@@ -1,18 +1,16 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { CustomerContactService } from '@/services/api' // Client often shares logic with customer contacts
 import { useApi } from '@/composables/useApi'
-import axios from 'axios'
+import { ClientService } from '@/services/api'
 
 // Assuming similar CRUD for Client based on system patterns
 export const useClientStore = defineStore('client', () => {
   const clients = ref([])
-  const clientApi = axios.create({ baseURL: 'https://localhost:7280/api/Client' })
-  
-  const getAllApi = useApi(() => clientApi.get('/'))
-  const createApi = useApi((dto) => clientApi.post('/', dto))
-  const updateApi = useApi((id, dto) => clientApi.put(`/${id}`, dto))
-  const deleteApi = useApi((id) => clientApi.delete(`/${id}`))
+  // Use centralized ClientService defined in services/api.js
+  const getAllApi = useApi(ClientService.getAll)
+  const createApi = useApi(ClientService.create)
+  const updateApi = useApi(ClientService.update)
+  const deleteApi = useApi(ClientService.delete)
 
   async function fetchAll() {
     clients.value = await getAllApi.execute()

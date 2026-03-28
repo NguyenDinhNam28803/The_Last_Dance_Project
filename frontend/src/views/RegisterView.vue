@@ -49,8 +49,10 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useAuthStore } from '../stores/auth'
+import { useNotify } from '@/composables/useNotify'
 
 const auth = useAuthStore()
+const notify = useNotify()
 const form = reactive({ userName: '', password: '', email: '', phoneNumber: '' })
 const loading = ref(false)
 const error = ref('')
@@ -61,14 +63,17 @@ async function handleRegister() {
   success.value = ''
   loading.value = true
   try {
-    const result = auth.register(form.userName, form.password, form.email, form.phoneNumber)
-    success.value = result.message
+    const payload = { userName: form.userName, password: form.password, email: form.email, phoneNumber: form.phoneNumber }
+    const result = await auth.register(payload)
+    success.value = result?.message || 'Đăng ký thành công. Vui lòng đăng nhập.'
+    notify.success(success.value)
     form.userName = ''
     form.password = ''
     form.email = ''
     form.phoneNumber = ''
   } catch (e) {
-    error.value = e.message
+    error.value = e.message || 'Đăng ký thất bại'
+    notify.error(error.value)
   } finally {
     loading.value = false
   }

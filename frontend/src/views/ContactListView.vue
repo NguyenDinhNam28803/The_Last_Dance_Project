@@ -154,14 +154,15 @@ import { ref, computed, reactive, onMounted } from 'vue'
 import { useCustomerContactStore } from '@/stores/customerContact'
 import { useAuthStore } from '@/stores/auth'
 import { addTypeLabels } from '../data/mockData'
+import { useNotify } from '@/composables/useNotify'
 
 const contactStore = useCustomerContactStore()
 const authStore = useAuthStore()
+const notify = useNotify()
 const search = ref('')
 const filterType = ref('')
 const showModal = ref(false)
 const isEditing = ref(false)
-const toast = ref(null)
 
 const modalForm = reactive({
   contactId: '', custId: '', countryId: 'VN', addType: 'A', infoType: 'TEP',
@@ -196,15 +197,15 @@ async function saveContact() {
   try {
     if (isEditing.value) {
       await contactStore.update(modalForm.contactId, modalForm)
-      showToast('Cập nhật liên hệ thành công!', 'success')
+      notify.success('Cập nhật liên hệ thành công!')
     } else {
       await contactStore.create(modalForm)
-      showToast('Thêm liên hệ thành công!', 'success')
+      notify.success('Thêm liên hệ thành công!')
     }
     await contactStore.fetchAll()
     showModal.value = false
   } catch (err) {
-    showToast('Lỗi: ' + (contactStore.error || 'Thất bại'), 'error')
+    notify.error('Lỗi: ' + (contactStore.error || 'Thất bại'))
   }
 }
 
@@ -212,28 +213,25 @@ async function handleSetDefault(c) {
   try {
     await contactStore.setDefault(c.contactId)
     await contactStore.fetchAll()
-    showToast('Đã đặt mặc định thành công!', 'success')
+    notify.success('Đã đặt mặc định thành công!')
   } catch (err) {
     showToast('Lỗi: ' + (contactStore.error || 'Thất bại'), 'error')
   }
 }
 
 async function handleDelete(c) {
-  if (confirm('Bạn có chắc muốn xóa liên hệ này?')) {
+    if (confirm('Bạn có chắc muốn xóa liên hệ này?')) {
     try {
       await contactStore.delete(c.contactId)
       await contactStore.fetchAll()
-      showToast('Xóa liên hệ thành công!', 'success')
+      notify.success('Xóa liên hệ thành công!')
     } catch (err) {
-      showToast('Lỗi: ' + (contactStore.error || 'Thất bại'), 'error')
+      notify.error('Lỗi: ' + (contactStore.error || 'Thất bại'))
     }
   }
 }
 
-function showToast(message, type = 'success') {
-  toast.value = { message, type }
-  setTimeout(() => { toast.value = null }, 3000)
-}
+// Notifications handled by useNotify composable
 </script>
 
 <style scoped>

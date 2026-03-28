@@ -82,6 +82,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useNotify } from '@/composables/useNotify'
 import Toolbar from '@/components/common/Toolbar.vue'
 import ValidationInput from '@/components/common/ValidationInput.vue'
 import { useAuditStore } from '@/stores/system'
@@ -98,11 +99,12 @@ const parseJson = (str) => {
   try { return JSON.parse(str || '{}') } catch (e) { return {} }
 }
 
+const notify = useNotify()
 const handleAction = async (action) => {
   if (action === 'refresh') {
     await auditStore.fetchLogs()
   } else if (action === 'search') {
-    alert('Tìm kiếm theo filter chưa được triển khai phía backend')
+    notify.info('Tìm kiếm theo filter chưa được triển khai phía backend')
   }
 }
 

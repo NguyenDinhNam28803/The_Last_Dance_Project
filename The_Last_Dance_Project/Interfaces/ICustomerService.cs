@@ -20,5 +20,7 @@ namespace The_Last_Dance_Project.Interfaces
         Task<bool> AdminUpdateUserAsync(string id, UserUpdateDto dto, string adminUserId);
         Task<bool> ChangeUserRoleAsync(string id, string newRoleId, string adminUserId);
         Task<bool> ToggleUserStatusAsync(string id, string adminUserId);
+        // Get customers whose RoleId is "USER"
+        Task<IEnumerable<UserResponseDto>> GetUsersWithRoleUserAsync();
     }
 }

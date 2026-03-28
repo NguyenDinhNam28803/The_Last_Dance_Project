@@ -52,6 +52,7 @@ namespace The_Last_Dance_Project.Services
             return customers.Select(MapToResponseDto);
         }
 
+
         public async Task<UserResponseDto?> GetByIdAsync(string id)
         {
             if (string.IsNullOrEmpty(id)) return null;
@@ -165,5 +166,17 @@ namespace The_Last_Dance_Project.Services
             return await _db.SaveChangesAsync() > 0;
         }
         #endregion
+
+        // Lấy danh sách khách hàng có Role = "USER"
+        public async Task<IEnumerable<UserResponseDto>> GetUsersWithRoleUserAsync()
+        {
+            var customers = await _db.Customers
+                .Include(c => c.Role)
+                .Where(c => c.RoleId == "USER")
+                .AsNoTracking()
+                .ToListAsync();
+
+            return customers.Select(MapToResponseDto);
+        }
     }
 }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using The_Last_Dance_Project.Interfaces;
 
@@ -6,6 +7,7 @@ namespace The_Last_Dance_Project.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class MakerCheckerController : ControllerBase
     {
         private readonly IMakerCheckerService _service;
@@ -18,6 +20,7 @@ namespace The_Last_Dance_Project.Controllers
         private string GetUserId() => User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "SYSTEM";
 
         [HttpGet("pending")]
+        [Authorize(Roles = "Checker,Administrator")]
         public async Task<IActionResult> GetPending()
         {
             var requests = await _service.GetPendingRequestsAsync();
@@ -25,6 +28,7 @@ namespace The_Last_Dance_Project.Controllers
         }
 
         [HttpPost("submit")]
+        [Authorize(Roles = "Maker,Administrator")]
         public async Task<IActionResult> Submit([FromBody] MakerCheckerRequest request)
         {
             var success = await _service.SubmitRequestAsync(request.EntityName, request.EntityId, request.Action, GetUserId(), request.Details);
@@ -32,6 +36,7 @@ namespace The_Last_Dance_Project.Controllers
         }
 
         [HttpPost("{id}/approve")]
+        [Authorize(Roles = "Checker,Administrator")]
         public async Task<IActionResult> Approve(int id)
         {
             var success = await _service.ApproveRequestAsync(id, GetUserId());
@@ -39,6 +44,7 @@ namespace The_Last_Dance_Project.Controllers
         }
 
         [HttpPost("{id}/reject")]
+        [Authorize(Roles = "Checker,Administrator")]
         public async Task<IActionResult> Reject(int id, [FromBody] RejectRequest request)
         {
             var success = await _service.RejectRequestAsync(id, GetUserId(), request.Reason);
@@ -46,6 +52,7 @@ namespace The_Last_Dance_Project.Controllers
         }
 
         [HttpPost("{id}/cancel")]
+        [Authorize(Roles = "Maker,Administrator")]
         public async Task<IActionResult> Cancel(int id)
         {
             var success = await _service.CancelRequestAsync(id, GetUserId());
