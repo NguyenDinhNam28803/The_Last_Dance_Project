@@ -54,8 +54,8 @@ export const ClientService = {
   getAll: () => api.get('/User/Client'),
   getById: (id) => api.get(`/User/Client/${id}`),
   create: (dto) => api.post('/User/Client', dto),
-  update: (id, dto) => api.put(`/User/Client/${id}`, dto),
-  delete: (id) => api.delete(`/User/Client/${id}`)
+  update: (id, dto) => api.put(`/User/${id}`, dto),
+  delete: (id) => api.delete(`/User/${id}`)
 }
 
 export const CustomerContactService = {

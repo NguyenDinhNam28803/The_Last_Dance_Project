@@ -50,6 +50,11 @@
               <span class="err-msg" v-if="errors.custId">{{ errors.custId }}</span>
             </div>
             <div class="field">
+              <label>Mật khẩu</label>
+              <input v-model="formData.Password" :disabled="mode !== 'add'" :class="{ err: errors.Password }" placeholder="Mật khẩu" />
+              <span class="err-msg" v-if="errors.Password">{{ errors.Password }}</span>
+            </div>
+            <div class="field">
               <label>Tên đăng nhập <span class="req">*</span></label>
               <input v-model="formData.userName" :disabled="mode !== 'add'" :class="{ err: errors.userName }" placeholder="username..." />
               <span class="err-msg" v-if="errors.userName">{{ errors.userName }}</span>
@@ -167,7 +172,7 @@
             <tr>
               <th class="check-col">
                 <input type="checkbox"
-                  :checked="filteredUsers.length > 0 && selectedIds.length === filteredUsers.length"
+                  :checked="filteredUsers?.length > 0 && selectedIds?.length === filteredUsers?.length"
                   @change="e => selectedIds = e.target.checked ? filteredUsers.map(u => u.custId) : []"
                 />
               </th>
@@ -268,7 +273,7 @@ import { useAuthStore } from '@/stores/auth'
 const userStore = useUserStore()
 const authStore = useAuthStore()
 
-const users         = userStore.users
+const users = computed(() => userStore.users ?? [])
 const loading       = computed(() => userStore.loading)
 const mode          = ref('view')
 const selectedUser  = ref(null)
@@ -289,8 +294,9 @@ const panelTitle = computed(() => {
 })
 
 const filteredUsers = computed(() => {
+  const list = users.value ?? [] 
   const q = searchQuery.value.toLowerCase().trim()
-  if (!q) return users.value
+  if (!q) return list
   return users.value.filter(u =>
     (u.userName  ?? '').toLowerCase().includes(q) ||
     (u.name      ?? '').toLowerCase().includes(q) ||

@@ -299,8 +299,8 @@ import { ImportExportService } from '@/services/api'
 
 const clientStore = useClientStore()
 const authStore = useAuthStore()
-const contactStore = useCustomerContactStore()
-const notify = useNotify()
+// const contactStore = useCustomerContactStore()
+// const notify = useNotify()
 
 const contacts = ref([])
 const contactLoading = ref(false)
@@ -311,7 +311,6 @@ const mode = ref('view')
 const selectedIds = ref([])
 const formData = ref({})
 const errors = ref({})
-const contacts = ref([])
 const fileInput = ref(null)
 
 onMounted(() => clientStore.fetchAll())
@@ -341,7 +340,6 @@ async function loadContactsFor(custId) {
     contacts.value = await contactStore.getByCustomer(custId)
   } catch (e) {
     console.error('Failed to load contacts', e)
-    notify.error('Không tải được thông tin liên hệ cho khách hàng')
     contacts.value = []
   } finally {
     contactLoading.value = false
@@ -387,10 +385,11 @@ const handleToolbarAction = async (action) => {
       formData.value = {}
     }
   } else if (action === 'save') {
+    console.log(formData.value)
     if (!validate()) return
     try {
         if (mode.value === 'add') await clientStore.create(formData.value)
-        else await clientStore.update(formData.value.clientId, formData.value)
+        else await clientStore.update(formData.value.custId, formData.value)
         alert('Lưu thành công!')
         mode.value = 'view'
         await clientStore.fetchAll()

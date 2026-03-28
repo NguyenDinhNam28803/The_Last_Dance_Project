@@ -58,7 +58,7 @@ namespace The_Last_Dance_Project.Controllers
 
         // Administrator cập nhật thông tin User
         [HttpPut("{id}")]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Administrator,Maker")]
         public async Task<IActionResult> Update(string id, [FromBody] UserUpdateDto dto)
         {
             var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "SYSTEM";
@@ -91,7 +91,7 @@ namespace The_Last_Dance_Project.Controllers
 
         // Lấy danh sách khách hàng có Role = "USER"
         [HttpGet("Client")]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Administrator,Maker")]
         public async Task<IActionResult> GetUsersWithRoleUser()
         {
             var users = await _userService.GetUsersWithRoleUserAsync();

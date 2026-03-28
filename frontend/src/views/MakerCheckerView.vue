@@ -229,6 +229,7 @@ const handleAction = async (action) => {
     showRejectModal.value = true
   }
 }
+}
 
 const confirmReject = async () => {
   if (!rejectReason.value) {
