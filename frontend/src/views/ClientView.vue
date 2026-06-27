@@ -64,12 +64,17 @@
       <div class="grid-content">
         <table class="grid-table">
           <thead>
-            <tr><th>Mã KH</th><th>Tên khách hàng</th></tr>
+            <tr><th>Mã KH</th><th>Tên khách hàng</th><th>Trạng thái</th></tr>
           </thead>
           <tbody>
-            <tr v-for="cli in clientStore.clients" :key="cli.clientId" @click="selectClient(cli)">
-              <td class="font-weight-bold">{{ cli.clientId }}</td>
+            <tr v-for="cli in clientStore.clients" :key="cli.custId || cli.clientId" @click="selectClient(cli)">
+              <td class="font-weight-bold">{{ cli.custId || cli.clientId }}</td>
               <td>{{ cli.name }}</td>
+              <td>
+                <span class="badge" :class="recordStatusBadge(cli.recordStatus)">
+                  {{ recordStatusLabel(cli.recordStatus) }}
+                </span>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -84,7 +89,10 @@ import Toolbar from '@/components/common/Toolbar.vue'
 import ValidationInput from '@/components/common/ValidationInput.vue'
 import { useClientStore } from '@/stores/client'
 import { useAuthStore } from '@/stores/auth'
+import { useCustomerContactStore } from '@/stores/customerContact'
+import { useNotify } from '@/composables/useNotify'
 import { ImportExportService } from '@/services/api'
+import { recordStatusLabel, recordStatusBadge } from '@/constants/recordStatus'
 
 const clientStore = useClientStore()
 const authStore = useAuthStore()

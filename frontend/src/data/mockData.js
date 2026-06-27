@@ -1,3 +1,11 @@
+// Nhãn loại liên hệ (AddType) theo Model CustomerContact: A: Địa chỉ, S: SĐT, E: Email, F: Fax
+export const addTypeLabels = {
+  A: 'Địa chỉ',
+  S: 'Số điện thoại',
+  E: 'Email',
+  F: 'Fax'
+}
+
 // Users mock
 export const mockUsers = [
   { custId: '1', username: 'admin', name: 'System Admin', email: 'admin@navi.vn', roleName: 'Admin', status: 'Active' },

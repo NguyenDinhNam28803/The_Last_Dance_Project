@@ -1,6 +1,4 @@
 using FluentValidation;
-using FluentValidation;
-using FluentValidation.AspNetCore;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -35,15 +33,27 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<The_Last_Dance_Project.Validators.RegisterRequestValidator>();
 builder.Services.AddEndpointsApiExplorer();
 
-// Cấu hình CORS
+// Cấu hình CORS: ưu tiên whitelist từ cấu hình "Cors:AllowedOrigins".
+// Nếu không khai báo origin nào thì fallback AllowAnyOrigin (chỉ nên dùng cho môi trường dev).
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
         policy =>
         {
-            policy.AllowAnyOrigin()
-                  .AllowAnyMethod()
-                  .AllowAnyHeader();
+            if (allowedOrigins.Length > 0)
+            {
+                policy.WithOrigins(allowedOrigins)
+                      .AllowAnyMethod()
+                      .AllowAnyHeader()
+                      .AllowCredentials();
+            }
+            else
+            {
+                policy.AllowAnyOrigin()
+                      .AllowAnyMethod()
+                      .AllowAnyHeader();
+            }
         });
 });
 
@@ -58,6 +68,15 @@ builder.Services.AddScoped<ICustomerContactService, CustomerContactService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<ISystemCodeService, SystemCodeService>();
 builder.Services.AddScoped<IImportExportService, ImportExportService>();
+builder.Services.AddScoped<IClientCodeService, ClientCodeService>();
+
+// JWT SecretKey bắt buộc cấu hình (User Secrets / biến môi trường) - không dùng giá trị mặc định yếu.
+var jwtSecretKey = builder.Configuration["JwtSettings:SecretKey"];
+if (string.IsNullOrWhiteSpace(jwtSecretKey))
+{
+    throw new InvalidOperationException(
+        "JwtSettings:SecretKey chưa được cấu hình. Hãy đặt qua User Secrets hoặc biến môi trường trước khi chạy ứng dụng.");
+}
 
 builder.Services.AddAuthentication(options =>
 {
@@ -74,8 +93,7 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["JwtSettings:Issuer"] ?? "LastDanceAPI",
         ValidAudience = builder.Configuration["JwtSettings:Audience"] ?? "LastDanceUsers",
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"] ?? "Key_Bi_Mat_Mac_Dinh_Sieu_Dai_1234567890"))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
     };
 
     options.Events = new JwtBearerEvents

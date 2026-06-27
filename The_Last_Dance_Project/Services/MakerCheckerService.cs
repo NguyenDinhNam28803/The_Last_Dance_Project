@@ -4,6 +4,7 @@ using The_Last_Dance_Project.Data;
 using The_Last_Dance_Project.Models;
 using Microsoft.EntityFrameworkCore;
 using The_Last_Dance_Project.Interfaces;
+using The_Last_Dance_Project.Constants;
 
 namespace The_Last_Dance_Project.Services
 {
@@ -21,7 +22,7 @@ namespace The_Last_Dance_Project.Services
         public async Task<IEnumerable<AuditEntity>> GetPendingRequestsAsync()
         {
             return await _db.AuditEntities
-                .Where(a => a.MtlStatus == "N")
+                .Where(a => a.MtlStatus == TransactionStatus.Pending)
                 .OrderByDescending(a => a.ActionDate)
                 .ToListAsync();
         }
@@ -29,12 +30,18 @@ namespace The_Last_Dance_Project.Services
         // MAKER: Tạo yêu cầu mới
         public async Task<bool> SubmitRequestAsync(string entityName, string entityId, string action, string makerId, string details)
         {
+            if (string.IsNullOrWhiteSpace(entityName) || string.IsNullOrWhiteSpace(makerId))
+                return false;
+
+            var normalizedAction = TransactionType.Normalize(action);
+
             var auditEntity = new AuditEntity
             {
                 ObjChange = entityName,
                 KeyField = entityId,
-                MtlType = action, // "CREATE", "UPDATE", "DELETE"
-                MtlStatus = "N", // N: Chờ duyệt (Pending)
+                KeyValue = entityId,
+                MtlType = normalizedAction, // INSERT, UPDATE, DELETE
+                MtlStatus = TransactionStatus.Pending, // N: Chờ duyệt (Pending)
                 Maker = makerId,
                 ActionDate = DateTime.UtcNow,
                 BusDate = DateTime.UtcNow,
@@ -115,13 +122,17 @@ namespace The_Last_Dance_Project.Services
         }
 
         // MAKER: Hủy yêu cầu của chính mình
+        // URD: cho phép hủy bản ghi 'Chờ duyệt' hoặc 'Từ chối'
         public async Task<bool> CancelRequestAsync(int mtTranId, string makerId)
         {
             var request = await _db.AuditEntities.FindAsync((long)mtTranId);
-            // Chỉ cho phép hủy nếu là người tạo và yêu cầu vẫn đang chờ duyệt (N)
-            if (request == null || request.MtlStatus != "N" || request.Maker != makerId) return false;
+            if (request == null || request.Maker != makerId) return false;
 
-            request.MtlStatus = "C"; // C: Cancelled
+            // Chỉ cho phép hủy khi đang Chờ duyệt (N) hoặc đã bị Từ chối (R)
+            if (request.MtlStatus != TransactionStatus.Pending && request.MtlStatus != TransactionStatus.Rejected)
+                return false;
+
+            request.MtlStatus = TransactionStatus.Cancelled; // C: Cancelled
             request.Description = "Maker cancelled request.";
 
             return await _db.SaveChangesAsync() > 0;
@@ -134,12 +145,12 @@ namespace The_Last_Dance_Project.Services
             try
             {
                 var request = await _db.AuditEntities.FindAsync((long)mtTranId);
-                if (request == null || request.MtlStatus != "N") return false;
+                if (request == null || request.MtlStatus != TransactionStatus.Pending) return false;
 
                 // Quy tắc bảo mật: Không được duyệt chính giao dịch mình tạo
                 if (request.Maker == checkerId) return false;
 
-                request.MtlStatus = "A"; // A: Đã duyệt
+                request.MtlStatus = TransactionStatus.Approved; // A: Đã duyệt
                 request.Checker = checkerId;
 
                 // THỰC THI THAY ĐỔI VÀO BẢNG NGHIỆP VỤ
@@ -172,13 +183,16 @@ namespace The_Last_Dance_Project.Services
         }
 
         // CHECKER: Từ chối yêu cầu
+        // URD: bắt buộc nhập lý do từ chối
         public async Task<bool> RejectRequestAsync(int mtTranId, string checkerId, string reason)
         {
+            if (string.IsNullOrWhiteSpace(reason)) return false; // Lý do từ chối là bắt buộc
+
             var request = await _db.AuditEntities.FindAsync((long)mtTranId);
-            if (request == null || request.MtlStatus != "N") return false;
+            if (request == null || request.MtlStatus != TransactionStatus.Pending) return false;
             if (request.Maker == checkerId) return false;
 
-            request.MtlStatus = "R"; // R: Rejected
+            request.MtlStatus = TransactionStatus.Rejected; // R: Rejected
             request.Checker = checkerId;
             request.Description = reason;
 

@@ -6,6 +6,7 @@ using The_Last_Dance_Project.Data;
 using The_Last_Dance_Project.Dtos;
 using The_Last_Dance_Project.Interfaces;
 using The_Last_Dance_Project.Models;
+using The_Last_Dance_Project.Constants;
 
 namespace The_Last_Dance_Project.Services
 {
@@ -124,13 +125,16 @@ namespace The_Last_Dance_Project.Services
         {
             try
             {
-                if (action == "CREATE")
+                // Chuẩn hóa action để khớp với hằng số TransactionType (INSERT/UPDATE/DELETE)
+                action = TransactionType.Normalize(action);
+
+                if (action == TransactionType.Insert)
                 {
                     var dto = System.Text.Json.JsonSerializer.Deserialize<CustomerContactCreateDto>(details);
                     if (dto == null) return false;
                     await CreateAsync(dto);
                 }
-                else if (action == "UPDATE")
+                else if (action == TransactionType.Update)
                 {
                     // For update, the details should contain both ID and the update DTO, 
                     // or we could use a specialized DTO. For simplicity, let's assume it has everything.
@@ -141,7 +145,7 @@ namespace The_Last_Dance_Project.Services
 
                     _db.Entry(existing).CurrentValues.SetValues(dto);
                 }
-                else if (action == "DELETE")
+                else if (action == TransactionType.Delete)
                 {
                     var id = details; // Assuming details is just the ID for delete
                     await DeleteAsync(id);

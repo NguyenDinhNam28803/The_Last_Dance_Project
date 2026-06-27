@@ -84,3 +84,12 @@ export const SystemCodeService = {
   getAll: () => api.get('/SystemCode'),
   create: (systemCode) => api.post('/SystemCode', systemCode)
 }
+
+// Import/Export Excel cho phân hệ Khách hàng (Client)
+export const ImportExportService = {
+  getTemplate: () => api.get('/ImportExport/template', { responseType: 'blob' }),
+  exportCustomers: () => api.get('/ImportExport/export-customers', { responseType: 'blob' }),
+  importCustomers: (formData) => api.post('/ImportExport/import-customers', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}
