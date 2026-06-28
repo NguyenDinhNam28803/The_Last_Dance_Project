@@ -53,6 +53,7 @@ export const UserService = {
 export const ClientService = {
   getAll: () => api.get('/User/Client'),
   getById: (id) => api.get(`/User/Client/${id}`),
+  getNextId: () => api.get('/User/Client/next-id'),
   create: (dto) => api.post('/User/Client', dto),
   update: (id, dto) => api.put(`/User/Client/${id}`, dto),
   delete: (id) => api.delete(`/User/Client/${id}`)

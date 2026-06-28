@@ -97,6 +97,32 @@ namespace The_Last_Dance_Project.Controllers
             var users = await _userService.GetUsersWithRoleUserAsync();
             return Ok(users);
         }
+
+        // Sinh ClientID tiếp theo (icon # trên màn hình Client)
+        [HttpGet("Client/next-id")]
+        [Authorize(Roles = "Administrator,Maker")]
+        public async Task<IActionResult> GenerateNextClientId()
+        {
+            var clientId = await _userService.GenerateNextClientIdAsync();
+            return Ok(new { clientId });
+        }
+
+        // Maker tạo mới Khách hàng (Client) - trạng thái Chờ duyệt thêm
+        [HttpPost("Client")]
+        [Authorize(Roles = "Administrator,Maker")]
+        public async Task<IActionResult> CreateClient([FromBody] ClientCreateDto dto)
+        {
+            var makerId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "SYSTEM";
+            try
+            {
+                var result = await _userService.CreateClientAsync(dto, makerId);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }
 

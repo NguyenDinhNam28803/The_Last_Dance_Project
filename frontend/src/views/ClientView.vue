@@ -26,7 +26,10 @@
           <legend class="form-section-title">Thông tin khách hàng</legend>
           <div class="row">
             <div class="col col-3">
-              <ValidationInput label="Mã khách hàng" required v-model="formData.clientId" :disabled="mode !== 'add'" :error="errors.clientId" />
+              <div style="display:flex; align-items:flex-end; gap:6px;">
+                <ValidationInput label="Mã khách hàng" required v-model="formData.clientId" :disabled="mode !== 'add'" :error="errors.clientId" style="flex:1;" />
+                <button v-if="mode === 'add'" type="button" class="btn btn-outline" title="Tự sinh mã" @click="generateClientId">#</button>
+              </div>
             </div>
             <div class="col col-4">
               <ValidationInput label="Tên khách hàng" required v-model="formData.name" :disabled="mode === 'view'" :error="errors.name" />
@@ -91,7 +94,7 @@ import { useClientStore } from '@/stores/client'
 import { useAuthStore } from '@/stores/auth'
 import { useCustomerContactStore } from '@/stores/customerContact'
 import { useNotify } from '@/composables/useNotify'
-import { ImportExportService } from '@/services/api'
+import { ImportExportService, ClientService } from '@/services/api'
 import { recordStatusLabel, recordStatusBadge } from '@/constants/recordStatus'
 
 const clientStore = useClientStore()
@@ -141,6 +144,17 @@ async function loadContactsFor(custId) {
     contacts.value = []
   } finally {
     contactLoading.value = false
+  }
+}
+
+// Tự sinh ClientID qua API (icon #)
+const generateClientId = async () => {
+  try {
+    const res = await ClientService.getNextId()
+    formData.value.clientId = res.data.clientId
+    if (errors.value.clientId) errors.value = { ...errors.value, clientId: undefined }
+  } catch (e) {
+    notify.error('Không sinh được mã khách hàng tự động')
   }
 }
 

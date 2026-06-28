@@ -22,5 +22,9 @@ namespace The_Last_Dance_Project.Interfaces
         Task<bool> ToggleUserStatusAsync(string id, string adminUserId);
         // Get customers whose RoleId is "USER"
         Task<IEnumerable<UserResponseDto>> GetUsersWithRoleUserAsync();
+
+        // Client (Khách hàng chứng khoán) - phân hệ theo URD
+        Task<string> GenerateNextClientIdAsync();
+        Task<UserResponseDto> CreateClientAsync(ClientCreateDto dto, string makerId);
     }
 }

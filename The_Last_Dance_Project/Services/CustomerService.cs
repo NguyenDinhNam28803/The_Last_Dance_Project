@@ -3,6 +3,7 @@ using The_Last_Dance_Project.Data;
 using The_Last_Dance_Project.Dtos;
 using The_Last_Dance_Project.Models;
 using The_Last_Dance_Project.Interfaces;
+using The_Last_Dance_Project.Constants;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
@@ -13,10 +14,12 @@ namespace The_Last_Dance_Project.Services
     public class CustomerService : ICustomerService
     {
         private readonly ApplicationDbContext _db;
+        private readonly IClientCodeService _clientCodeService;
 
-        public CustomerService(ApplicationDbContext db)
+        public CustomerService(ApplicationDbContext db, IClientCodeService clientCodeService)
         {
             _db = db;
+            _clientCodeService = clientCodeService;
         }
 
         #region Helpers
@@ -178,5 +181,76 @@ namespace The_Last_Dance_Project.Services
 
             return customers.Select(MapToResponseDto);
         }
+
+        #region Client (Phân hệ Khách hàng chứng khoán - URD)
+
+        // Sinh ClientID 6 số nhỏ nhất chưa tồn tại (icon #)
+        public async Task<string> GenerateNextClientIdAsync()
+        {
+            return await _clientCodeService.GenerateClientIdAsync();
+        }
+
+        // Tạo mới Khách hàng: tự sinh ClientID/CustodyID/FATCA, đặt trạng thái Chờ duyệt thêm
+        public async Task<UserResponseDto> CreateClientAsync(ClientCreateDto dto, string makerId)
+        {
+            // 1. Giải quyết ClientID: "#"/rỗng -> tự sinh
+            var clientId = dto.ClientId;
+            if (string.IsNullOrWhiteSpace(clientId) || clientId == "#")
+            {
+                clientId = await _clientCodeService.GenerateClientIdAsync();
+            }
+
+            // 2. Kiểm tra trùng mã
+            if (await _db.Customers.AnyAsync(c => c.CustId == clientId))
+            {
+                throw new InvalidOperationException($"Mã khách hàng '{clientId}' đã tồn tại.");
+            }
+
+            // 3. KH cá nhân phải đủ 18 tuổi
+            var isIndividual = (dto.RegistrationType ?? string.Empty).ToUpperInvariant().Contains("RETAIL");
+            if (isIndividual && !_clientCodeService.IsAtLeast18(dto.DateOfBirth))
+            {
+                throw new InvalidOperationException("Khách hàng cá nhân phải đủ 18 tuổi.");
+            }
+
+            // 4. Tự sinh CustodyID và phát hiện FATCA
+            var custodyId = _clientCodeService.GenerateCustodyId(dto.RegistrationType, clientId);
+            var fatca = _clientCodeService.DetectFatca(dto.Nationality) ? "Y" : "N";
+
+            var client = new Customer
+            {
+                CustId = clientId,
+                UserName = clientId,           // KH chưa có tài khoản đăng nhập -> dùng mã làm định danh
+                Name = dto.Name,
+                NameOther = dto.NameOther,
+                ShortName = dto.ShortName,
+                RegistrationType = dto.RegistrationType,
+                Nationality = dto.Nationality,
+                InstitutionTypeId = dto.InstitutionType,
+                InvestorCode = dto.InvestorCode,
+                Gender = dto.Gender,
+                DateOfBirth = dto.DateOfBirth,
+                PlaceOfBirth = dto.PlaceOfBirth,
+                ResidentCountryId = dto.ResidentCountryId,
+                IsStaff = dto.IsStaff,
+                OpenVia = dto.CreationMethod,
+                CustodyCd = custodyId,
+                FATCA = fatca,
+                Email = dto.Email,
+                PhoneNumber = dto.PhoneNumber,
+                Status = "Active",
+                RecordStatus = RecordStatus.PendingInsert, // PI: Chờ duyệt thêm
+                RoleId = "USER",
+                CreatedBy = makerId,
+                CreatedDate = DateTime.UtcNow
+            };
+
+            _db.Customers.Add(client);
+            await _db.SaveChangesAsync();
+
+            return await GetByIdAsync(clientId) ?? MapToResponseDto(client);
+        }
+
+        #endregion
     }
 }

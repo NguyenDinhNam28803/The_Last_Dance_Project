@@ -83,10 +83,32 @@ Các quy tắc nghiệp vụ URD mục 3.2, đăng ký DI trong `Program.cs`:
 ## 4. Chưa làm (đưa sang sprint sau)
 
 - Tách hẳn entity `User` (auth) khỏi `Client` (nghiệp vụ) — cần migration, **rủi ro cao**, làm khi có .NET SDK + DB.
-- Áp `RecordStatus` (PI/PU/PD…) vào chính bản ghi `Customer` (hiện trạng thái sống ở MTTRAN).
+- Bổ sung cột giấy tờ định danh (IdType/IdNumber/IdIssueDate…) vào schema — cần migration.
 - Unit test state machine (cần tạo test project — hoãn vì không build/test C# được tại đây).
 - Toolbar động theo vai trò + tìm kiếm wildcard + cấu hình cột (Phase 3).
-- Validation KYC đầy đủ qua FluentValidation (Phase 2).
+
+---
+
+## 6. Bổ sung Phase 2 — Validation KYC & luồng tạo Client
+
+> Frontend đã build kiểm chứng ✅. Backend chưa compile tại đây (không có SDK).
+
+- **`Dtos/ClientDto.cs`** — `ClientCreateDto` với các trường KYC hiện có cột trong `Customer`.
+- **`Validators/ClientValidators.cs`** — FluentValidation theo URD 3.2.3:
+  - KH cá nhân (Retail): bắt buộc Giới tính + Ngày sinh, **đủ 18 tuổi**.
+  - KH tổ chức (Institution): bắt buộc Loại hình tổ chức.
+  - KH nước ngoài (Foreign): bắt buộc Investor code.
+  - ClientID nếu nhập tay phải **6 chữ số**.
+- **`CustomerService.CreateClientAsync`** (inject `IClientCodeService`):
+  - `#`/rỗng → **tự sinh ClientID**; chặn trùng mã.
+  - Tự sinh **CustodyID** (003C/003F) + **auto-detect FATCA**.
+  - Đặt `RecordStatus = PendingInsert` (PI), Role = USER.
+- **Endpoint mới** (`UserController`): `GET /User/Client/next-id`, `POST /User/Client`.
+- **Frontend**: `ClientService.getNextId` + nút **#** tự sinh mã trên màn hình Client.
+
+### Việc bạn cần làm thêm
+- `dotnet build` để xác nhận biên dịch backend Phase 2.
+- (Tùy chọn) bổ sung cột giấy tờ định danh nếu muốn validate đầy đủ IDType/IDNumber.
 
 ---
 
