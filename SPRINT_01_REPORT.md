@@ -203,7 +203,26 @@ Các quy tắc nghiệp vụ URD mục 3.2, đăng ký DI trong `Program.cs`:
 ### Còn lại cho phân hệ Client
 - Bulk gói trong 1 transaction backend.
 - Tải/hiển thị nhiều ảnh chữ ký; cột giấy tờ định danh (cần migration).
-- i18n VN/EN (Phase tiếp theo theo kế hoạch tổng).
+
+---
+
+## 11. Phase 7 — Đa ngôn ngữ VN/EN (i18n)
+
+> 100% frontend — **đã build kiểm chứng** ✅. Không thêm thư viện ngoài (i18n tự xây, nhẹ).
+
+**Hạ tầng:**
+- `i18n/messages.js` — từ điển VN/EN (nav, field, grid, contact, common…).
+- `stores/locale.js` — Pinia store: `locale` (lưu localStorage), `setLocale`, `t(key)` (dịch khóa), `tc({vi,en})` (dịch object hằng số).
+- `composables/useI18n.js` — `{ t, tc, locale, setLocale }`.
+
+**Áp dụng:**
+- `TopNav`: **nút chuyển VN/EN** + dịch toàn bộ menu điều hướng + nút Đăng xuất + placeholder tìm kiếm.
+- `ClientView`: dịch tab, tiêu đề section, **toàn bộ nhãn trường**, header lưới + cấu hình cột, phân trang, tab Liên hệ; **các droplist đổi ngôn ngữ tức thì** (loại hình KH, loại tổ chức, giới tính, kênh mở TK, loại liên hệ/loại thông tin) qua `tc()`; trạng thái bản ghi theo ngôn ngữ.
+- Đổi ngôn ngữ **không reload trang**, ghi nhớ lựa chọn (localStorage) — đúng yêu cầu URD.
+
+### Còn lại
+- Áp i18n cho các màn còn lại (Login, Dashboard, User, SystemCode, Audit, MakerChecker) theo cùng pattern.
+- Toolbar buttons (Search/Add/…) hiện vẫn nhãn cố định — có thể map qua `t()` sau.
 
 ---
 

@@ -3,10 +3,10 @@
     
     <!-- LEFT PANEL: THÔNG TIN CHI TIẾT (FORM) -->
     <div class="form-panel">
-      <Toolbar 
-        title="Tài khoản" 
-        :features="toolbarFeatures" 
-        @action="handleToolbarAction" 
+      <Toolbar
+        :title="t('client.title')"
+        :features="toolbarFeatures"
+        @action="handleToolbarAction"
       />
       <input type="file" ref="fileInput" hidden accept=".xlsx, .xls" @change="handleFileUpload" />
       
@@ -16,80 +16,76 @@
       <div v-else :style="selectedIds.length > 1 ? 'opacity: 0.4; pointer-events: none; filter: grayscale(100%);' : ''">
       <!-- Tabs -->
       <div class="tabs-header mt-4 mb-4">
-        <button class="tab-btn" :class="{ active: currentTab === 'general' }" @click="currentTab = 'general'">Thông tin chung</button>
-        <button class="tab-btn" :class="{ active: currentTab === 'contact' }" @click="currentTab = 'contact'">Liên hệ</button>
+        <button class="tab-btn" :class="{ active: currentTab === 'general' }" @click="currentTab = 'general'">{{ t('client.tab.general') }}</button>
+        <button class="tab-btn" :class="{ active: currentTab === 'contact' }" @click="currentTab = 'contact'">{{ t('client.tab.contact') }}</button>
       </div>
-      
+
       <!-- TAB 1: THÔNG TIN CHUNG -->
       <div v-show="currentTab === 'general'" class="tab-content">
         <fieldset class="form-section" :disabled="isReadonly">
-          <legend class="form-section-title">Thông tin khách hàng</legend>
+          <legend class="form-section-title">{{ t('client.sec.customerInfo') }}</legend>
           <div class="form-grid">
             <div class="fld">
               <div style="display:flex; align-items:flex-end; gap:6px;">
-                <ValidationInput label="Mã khách hàng" required v-model="formData.clientId" :disabled="mode !== 'add'" :error="errors.clientId" style="flex:1;" />
-                <button v-if="mode === 'add'" type="button" class="btn btn-outline" title="Tự sinh mã" @click="generateClientId">#</button>
+                <ValidationInput :label="t('field.clientId')" required v-model="formData.clientId" :disabled="mode !== 'add'" :error="errors.clientId" style="flex:1;" />
+                <button v-if="mode === 'add'" type="button" class="btn btn-outline" title="#" @click="generateClientId">#</button>
               </div>
             </div>
-            <ValidationInput class="fld" label="Tên khách hàng" required v-model="formData.name" :disabled="isReadonly" :error="errors.name" />
-            <ValidationInput class="fld" label="Tên (ngôn ngữ khác)" v-model="formData.nameOther" :disabled="isReadonly" />
-            <ValidationInput class="fld" label="Tên viết tắt" v-model="formData.shortName" :disabled="isReadonly" />
+            <ValidationInput class="fld" :label="t('field.name')" required v-model="formData.name" :disabled="isReadonly" :error="errors.name" />
+            <ValidationInput class="fld" :label="t('field.nameOther')" v-model="formData.nameOther" :disabled="isReadonly" />
+            <ValidationInput class="fld" :label="t('field.shortName')" v-model="formData.shortName" :disabled="isReadonly" />
 
-            <ValidationInput class="fld" label="Loại hình khách hàng" required :error="errors.registrationType">
+            <ValidationInput class="fld" :label="t('field.registrationType')" required :error="errors.registrationType">
               <select v-model="formData.registrationType" class="form-control" :disabled="isReadonly">
-                <option value="">-- Chọn --</option>
-                <option v-for="o in registrationTypes" :key="o.id" :value="o.id">{{ o.vi }}</option>
+                <option value="">{{ t('btn.choose') }}</option>
+                <option v-for="o in registrationTypes" :key="o.id" :value="o.id">{{ tc(o) }}</option>
               </select>
             </ValidationInput>
-            <ValidationInput class="fld" label="Quốc tịch" v-model="formData.nationality" :disabled="isReadonly" />
+            <ValidationInput class="fld" :label="t('field.nationality')" v-model="formData.nationality" :disabled="isReadonly" />
 
-            <ValidationInput v-if="isInstitution" class="fld" label="Loại tổ chức" required :error="errors.institutionType">
+            <ValidationInput v-if="isInstitution" class="fld" :label="t('field.institutionType')" required :error="errors.institutionType">
               <select v-model="formData.institutionType" class="form-control" :disabled="isReadonly">
-                <option value="">-- Chọn --</option>
-                <option v-for="o in institutionOptions" :key="o.id" :value="o.id">{{ o.vi }}</option>
+                <option value="">{{ t('btn.choose') }}</option>
+                <option v-for="o in institutionOptions" :key="o.id" :value="o.id">{{ tc(o) }}</option>
               </select>
             </ValidationInput>
-            <ValidationInput v-if="isForeign" class="fld" label="Investor code" required v-model="formData.investorCode" :disabled="isReadonly" :error="errors.investorCode" />
+            <ValidationInput v-if="isForeign" class="fld" :label="t('field.investorCode')" required v-model="formData.investorCode" :disabled="isReadonly" :error="errors.investorCode" />
 
-            <ValidationInput v-if="isIndividual" class="fld" label="Giới tính" required :error="errors.gender">
+            <ValidationInput v-if="isIndividual" class="fld" :label="t('field.gender')" required :error="errors.gender">
               <select v-model="formData.gender" class="form-control" :disabled="isReadonly">
-                <option value="">-- Chọn --</option>
-                <option value="M">Nam</option>
-                <option value="F">Nữ</option>
-                <option value="O">Khác</option>
+                <option value="">{{ t('btn.choose') }}</option>
+                <option v-for="o in genderOptions" :key="o.id" :value="o.id">{{ tc(o) }}</option>
               </select>
             </ValidationInput>
-            <ValidationInput v-if="isIndividual" class="fld" type="date" label="Ngày sinh" required v-model="formData.dateOfBirth" :disabled="isReadonly" :error="errors.dateOfBirth" />
+            <ValidationInput v-if="isIndividual" class="fld" type="date" :label="t('field.dob')" required v-model="formData.dateOfBirth" :disabled="isReadonly" :error="errors.dateOfBirth" />
 
-            <ValidationInput class="fld" label="Nơi sinh" v-model="formData.placeOfBirth" :disabled="isReadonly" />
-            <ValidationInput class="fld" label="Quốc gia cư trú" v-model="formData.residentCountryId" :disabled="isReadonly" />
-            <ValidationInput class="fld" label="Email" v-model="formData.email" :disabled="isReadonly" :error="errors.email" />
-            <ValidationInput class="fld" label="Số điện thoại" v-model="formData.phoneNumber" :disabled="isReadonly" />
+            <ValidationInput class="fld" :label="t('field.placeOfBirth')" v-model="formData.placeOfBirth" :disabled="isReadonly" />
+            <ValidationInput class="fld" :label="t('field.residentCountry')" v-model="formData.residentCountryId" :disabled="isReadonly" />
+            <ValidationInput class="fld" :label="t('field.email')" v-model="formData.email" :disabled="isReadonly" :error="errors.email" />
+            <ValidationInput class="fld" :label="t('field.phone')" v-model="formData.phoneNumber" :disabled="isReadonly" />
 
-            <ValidationInput class="fld" label="Kênh mở TK">
+            <ValidationInput class="fld" :label="t('field.creationMethod')">
               <select v-model="formData.creationMethod" class="form-control" :disabled="isReadonly">
-                <option value="">-- Chọn --</option>
-                <option value="COUNTER">Tại quầy</option>
-                <option value="EKYC">EKYC</option>
-                <option value="BROKER">Qua môi giới</option>
+                <option value="">{{ t('btn.choose') }}</option>
+                <option v-for="o in creationMethodOptions" :key="o.id" :value="o.id">{{ tc(o) }}</option>
               </select>
             </ValidationInput>
             <div class="fld checkbox-fld">
-              <label><input type="checkbox" :checked="formData.isStaff === 'Y'" :disabled="isReadonly" @change="formData.isStaff = $event.target.checked ? 'Y' : 'N'" /> Nhân viên công ty</label>
+              <label><input type="checkbox" :checked="formData.isStaff === 'Y'" :disabled="isReadonly" @change="formData.isStaff = $event.target.checked ? 'Y' : 'N'" /> {{ t('field.isStaff') }}</label>
             </div>
           </div>
         </fieldset>
 
         <!-- Trạng thái / thông tin sinh tự động (chỉ đọc) -->
         <fieldset class="form-section">
-          <legend class="form-section-title">Trạng thái</legend>
+          <legend class="form-section-title">{{ t('client.sec.status') }}</legend>
           <div class="form-grid">
             <div class="fld">
-              <label class="form-label">Trạng thái bản ghi</label>
-              <span class="badge" :class="recordStatusBadge(formData.recordStatus)">{{ recordStatusLabel(formData.recordStatus) }}</span>
+              <label class="form-label">{{ t('client.recordStatus') }}</label>
+              <span class="badge" :class="recordStatusBadge(formData.recordStatus)">{{ recordStatusLabel(formData.recordStatus, locale) }}</span>
             </div>
-            <div class="fld"><label class="form-label">Số TK lưu ký</label><div>{{ formData.custodyCd || '—' }}</div></div>
-            <div class="fld"><label class="form-label">FATCA</label><div>{{ formData.fatca === 'Y' ? 'Có' : 'Không' }}</div></div>
+            <div class="fld"><label class="form-label">{{ t('client.custodyId') }}</label><div>{{ formData.custodyCd || '—' }}</div></div>
+            <div class="fld"><label class="form-label">{{ t('client.fatca') }}</label><div>{{ formData.fatca === 'Y' ? t('common.yes') : t('common.no') }}</div></div>
           </div>
         </fieldset>
       </div>
@@ -97,18 +93,18 @@
       <!-- TAB 2: LIÊN HỆ -->
       <div v-show="currentTab === 'contact'" class="tab-content">
         <div v-if="!formData.custId" class="empty-state">
-          Chọn (hoặc lưu) một khách hàng để quản lý thông tin liên hệ.
+          {{ t('contact.selectClient') }}
         </div>
         <template v-else>
           <div class="contact-header">
-            <span>Danh sách liên hệ ({{ contacts.length }})</span>
-            <button v-if="canManageContacts" class="btn btn-primary btn-sm" @click="openAddContact">+ Thêm liên hệ</button>
+            <span>{{ t('contact.list') }} ({{ contacts.length }})</span>
+            <button v-if="canManageContacts" class="btn btn-primary btn-sm" @click="openAddContact">{{ t('contact.add') }}</button>
           </div>
-          <p class="contact-note">Lưu ý: thêm/sửa/xóa liên hệ sẽ gửi yêu cầu chờ Checker duyệt.</p>
+          <p class="contact-note">{{ t('contact.note') }}</p>
 
           <table class="data-table contact-table">
             <thead>
-              <tr><th>Loại LH</th><th>Loại thông tin</th><th>Giá trị</th><th>Quốc gia</th><th>Mặc định</th><th v-if="canManageContacts">Thao tác</th></tr>
+              <tr><th>{{ t('contact.type') }}</th><th>{{ t('contact.infoType') }}</th><th>{{ t('contact.value') }}</th><th>{{ t('contact.country') }}</th><th>{{ t('contact.default') }}</th><th v-if="canManageContacts">{{ t('contact.actions') }}</th></tr>
             </thead>
             <tbody>
               <tr v-for="c in contacts" :key="c.contactId">
@@ -124,35 +120,35 @@
                 </td>
               </tr>
               <tr v-if="contacts.length === 0">
-                <td :colspan="canManageContacts ? 6 : 5" class="empty-state">Chưa có thông tin liên hệ</td>
+                <td :colspan="canManageContacts ? 6 : 5" class="empty-state">{{ t('contact.empty') }}</td>
               </tr>
             </tbody>
           </table>
 
           <!-- Form thêm/sửa liên hệ -->
           <fieldset v-if="showContactForm" class="form-section contact-form">
-            <legend class="form-section-title">{{ contactEditing ? 'Sửa liên hệ' : 'Thêm liên hệ' }}</legend>
+            <legend class="form-section-title">{{ contactEditing ? t('contact.editTitle') : t('contact.addTitle') }}</legend>
             <div class="form-grid">
-              <ValidationInput class="fld" label="Loại liên hệ" required>
+              <ValidationInput class="fld" :label="t('contact.type')" required>
                 <select v-model="contactForm.addType" class="form-control" @change="onAddTypeChange">
-                  <option v-for="o in addTypeOptions" :key="o.id" :value="o.id">{{ o.vi }}</option>
+                  <option v-for="o in addTypeOptions" :key="o.id" :value="o.id">{{ tc(o) }}</option>
                 </select>
               </ValidationInput>
-              <ValidationInput class="fld" label="Loại thông tin" required>
+              <ValidationInput class="fld" :label="t('contact.infoType')" required>
                 <select v-model="contactForm.infoType" class="form-control">
-                  <option v-for="o in contactInfoOptions" :key="o.id" :value="o.id">{{ o.vi }}</option>
+                  <option v-for="o in contactInfoOptions" :key="o.id" :value="o.id">{{ tc(o) }}</option>
                 </select>
               </ValidationInput>
-              <ValidationInput class="fld" label="Giá trị" required v-model="contactForm.contact" :error="contactError" />
-              <ValidationInput class="fld" label="Quốc gia" v-model="contactForm.countryId" />
-              <ValidationInput v-if="contactForm.addType === 'F'" class="fld" label="Fax attention" v-model="contactForm.faxAttention" />
+              <ValidationInput class="fld" :label="t('contact.value')" required v-model="contactForm.contact" :error="contactError" />
+              <ValidationInput class="fld" :label="t('contact.country')" v-model="contactForm.countryId" />
+              <ValidationInput v-if="contactForm.addType === 'F'" class="fld" :label="t('contact.faxAttention')" v-model="contactForm.faxAttention" />
               <div class="fld checkbox-fld">
-                <label><input type="checkbox" :checked="contactForm.isDefault === 'Y'" @change="contactForm.isDefault = $event.target.checked ? 'Y' : 'N'" /> Mặc định</label>
+                <label><input type="checkbox" :checked="contactForm.isDefault === 'Y'" @change="contactForm.isDefault = $event.target.checked ? 'Y' : 'N'" /> {{ t('contact.default') }}</label>
               </div>
             </div>
             <div class="contact-form-actions">
-              <button class="btn btn-outline btn-sm" @click="showContactForm = false">Hủy</button>
-              <button class="btn btn-primary btn-sm" @click="saveContact">Lưu</button>
+              <button class="btn btn-outline btn-sm" @click="showContactForm = false">{{ t('btn.cancel') }}</button>
+              <button class="btn btn-primary btn-sm" @click="saveContact">{{ t('btn.save') }}</button>
             </div>
           </fieldset>
         </template>
@@ -164,7 +160,7 @@
     <!-- RIGHT PANEL: GRID -->
     <div class="grid-panel" :class="{ collapsed: isGridCollapsed }">
       <div class="grid-panel-header">
-        <span>K.Quả ({{ grid.totalItems.value }})</span>
+        <span>{{ t('grid.result') }} ({{ grid.totalItems.value }})</span>
         <button class="btn btn-outline" @click="isGridCollapsed = !isGridCollapsed">Thu gọn</button>
       </div>
 
@@ -173,13 +169,13 @@
         <input
           v-model="grid.searchTerm.value"
           class="grid-search"
-          placeholder="Tìm kiếm (MIN*, *MIN, *MIN*, chính xác)"
+          :placeholder="t('grid.searchPlaceholder')"
         />
-        <button class="btn btn-outline" title="Xóa tìm kiếm" @click="grid.clearSearch()">Clear</button>
+        <button class="btn btn-outline" @click="grid.clearSearch()">Clear</button>
         <select v-model.number="grid.pageSize.value" class="grid-pagesize">
-          <option v-for="s in grid.PAGE_SIZES" :key="s" :value="s">{{ s }}/trang</option>
+          <option v-for="s in grid.PAGE_SIZES" :key="s" :value="s">{{ s }}{{ t('grid.perPage') }}</option>
         </select>
-        <button class="btn btn-outline" title="Cấu hình cột" @click="showColumnConfig = !showColumnConfig">⚙ Cột</button>
+        <button class="btn btn-outline" @click="showColumnConfig = !showColumnConfig">⚙ {{ t('grid.columns') }}</button>
       </div>
 
       <!-- Popup cấu hình cột -->
@@ -187,7 +183,7 @@
         <div v-for="col in grid.columns.value" :key="col.key" class="column-config-row">
           <label>
             <input type="checkbox" :checked="col.visible" @change="grid.toggleColumn(col.key)" />
-            {{ col.label }}
+            {{ t(col.label) }}
           </label>
           <span class="column-config-actions">
             <button class="btn btn-ghost btn-sm" @click="grid.moveColumn(col.key, 'up')">↑</button>
@@ -195,8 +191,8 @@
           </span>
         </div>
         <div class="column-config-footer">
-          <button class="btn btn-outline" @click="grid.resetColumns()">Mặc định</button>
-          <button class="btn btn-primary" @click="showColumnConfig = false">Đóng</button>
+          <button class="btn btn-outline" @click="grid.resetColumns()">{{ t('grid.default') }}</button>
+          <button class="btn btn-primary" @click="showColumnConfig = false">{{ t('grid.close') }}</button>
         </div>
       </div>
 
@@ -218,7 +214,7 @@
               <th v-if="canBulk" class="checkbox-col">
                 <input type="checkbox" :checked="isAllPageSelected" @change="toggleAllPage" />
               </th>
-              <th v-for="col in grid.visibleColumns.value" :key="col.key">{{ col.label }}</th>
+              <th v-for="col in grid.visibleColumns.value" :key="col.key">{{ t(col.label) }}</th>
             </tr>
           </thead>
           <tbody>
@@ -228,13 +224,13 @@
               </td>
               <td v-for="col in grid.visibleColumns.value" :key="col.key" :class="{ 'font-weight-bold': col.key === 'custId' }">
                 <span v-if="col.key === 'recordStatus'" class="badge" :class="recordStatusBadge(cli.recordStatus)">
-                  {{ recordStatusLabel(cli.recordStatus) }}
+                  {{ recordStatusLabel(cli.recordStatus, locale) }}
                 </span>
                 <span v-else>{{ cellValue(cli, col.key) }}</span>
               </td>
             </tr>
             <tr v-if="grid.paged.value.length === 0">
-              <td :colspan="grid.visibleColumns.value.length + (canBulk ? 1 : 0)" class="empty-state">Không tìm thấy bản ghi nào</td>
+              <td :colspan="grid.visibleColumns.value.length + (canBulk ? 1 : 0)" class="empty-state">{{ t('grid.empty') }}</td>
             </tr>
           </tbody>
         </table>
@@ -243,7 +239,7 @@
       <!-- Phân trang -->
       <div class="grid-pagination">
         <button class="btn btn-outline btn-sm" :disabled="grid.currentPage.value <= 1" @click="grid.goToPage(grid.currentPage.value - 1)">‹</button>
-        <span>Trang {{ grid.currentPage.value }} / {{ grid.totalPages.value }}</span>
+        <span>{{ t('grid.page') }} {{ grid.currentPage.value }} / {{ grid.totalPages.value }}</span>
         <button class="btn btn-outline btn-sm" :disabled="grid.currentPage.value >= grid.totalPages.value" @click="grid.goToPage(grid.currentPage.value + 1)">›</button>
       </div>
     </div>
@@ -292,13 +288,26 @@ import { ImportExportService, ClientService } from '@/services/api'
 import { recordStatusLabel, recordStatusBadge } from '@/constants/recordStatus'
 import { useDataGrid } from '@/composables/useDataGrid'
 import { institutionTypesByScope } from '@/constants/institutionType'
+import { useI18n } from '@/composables/useI18n'
+
+const { t, tc, locale } = useI18n()
 
 // Loại hình khách hàng (URD)
 const registrationTypes = [
-  { id: 'LOCAL_RETAIL', vi: 'Cá nhân trong nước' },
-  { id: 'FOREIGN_RETAIL', vi: 'Cá nhân nước ngoài' },
-  { id: 'LOCAL_INSTITUTION', vi: 'Tổ chức trong nước' },
-  { id: 'FOREIGN_INSTITUTION', vi: 'Tổ chức nước ngoài' }
+  { id: 'LOCAL_RETAIL', vi: 'Cá nhân trong nước', en: 'Local Retail' },
+  { id: 'FOREIGN_RETAIL', vi: 'Cá nhân nước ngoài', en: 'Foreign Retail' },
+  { id: 'LOCAL_INSTITUTION', vi: 'Tổ chức trong nước', en: 'Local Institutional' },
+  { id: 'FOREIGN_INSTITUTION', vi: 'Tổ chức nước ngoài', en: 'Foreign Institutional' }
+]
+const genderOptions = [
+  { id: 'M', vi: 'Nam', en: 'Male' },
+  { id: 'F', vi: 'Nữ', en: 'Female' },
+  { id: 'O', vi: 'Khác', en: 'Other' }
+]
+const creationMethodOptions = [
+  { id: 'COUNTER', vi: 'Tại quầy', en: 'At counter' },
+  { id: 'EKYC', vi: 'EKYC', en: 'EKYC' },
+  { id: 'BROKER', vi: 'Qua môi giới', en: 'Via broker' }
 ]
 
 const clientStore = useClientStore()
@@ -320,11 +329,11 @@ const showColumnConfig = ref(false)
 
 // Lưới Kết quả tìm kiếm: wildcard + phân trang + cấu hình cột (lưu theo user)
 const clientColumns = [
-  { key: 'custId', label: 'Mã KH' },
-  { key: 'name', label: 'Tên khách hàng' },
-  { key: 'registrationType', label: 'Loại hình' },
-  { key: 'nationality', label: 'Quốc tịch' },
-  { key: 'recordStatus', label: 'Trạng thái' }
+  { key: 'custId', label: 'col.custId' },
+  { key: 'name', label: 'col.name' },
+  { key: 'registrationType', label: 'col.registrationType' },
+  { key: 'nationality', label: 'col.nationality' },
+  { key: 'recordStatus', label: 'col.recordStatus' }
 ]
 const grid = useDataGrid({
   source: computed(() => clientStore.clients),
@@ -386,21 +395,25 @@ async function loadContactsFor(custId) {
 
 // ===== Tab Liên hệ: danh mục & CRUD =====
 const addTypeOptions = [
-  { id: 'A', vi: 'Địa chỉ' },
-  { id: 'S', vi: 'Số điện thoại' },
-  { id: 'E', vi: 'Email' },
-  { id: 'F', vi: 'Fax' }
+  { id: 'A', vi: 'Địa chỉ', en: 'Address' },
+  { id: 'S', vi: 'Số điện thoại', en: 'Phone' },
+  { id: 'E', vi: 'Email', en: 'Email' },
+  { id: 'F', vi: 'Fax', en: 'Fax' }
 ]
 const infoTypeByAddType = {
-  A: [{ id: 'PER', vi: 'Thường trú/Trụ sở' }, { id: 'CON', vi: 'Liên lạc' }, { id: 'BIL', vi: 'Hóa đơn' }],
-  S: [{ id: 'HOM', vi: 'Số nhà' }, { id: 'OFC', vi: 'Công ty' }, { id: 'MOB', vi: 'Di động' }],
-  E: [{ id: 'EML', vi: 'Email' }],
-  F: [{ id: 'FAX', vi: 'Fax' }]
+  A: [{ id: 'PER', vi: 'Thường trú/Trụ sở', en: 'Permanent/HQ' }, { id: 'CON', vi: 'Liên lạc', en: 'Contact' }, { id: 'BIL', vi: 'Hóa đơn', en: 'Billing' }],
+  S: [{ id: 'HOM', vi: 'Số nhà', en: 'Home Tel' }, { id: 'OFC', vi: 'Công ty', en: 'Office Tel' }, { id: 'MOB', vi: 'Di động', en: 'Mobile Tel' }],
+  E: [{ id: 'EML', vi: 'Email', en: 'Email' }],
+  F: [{ id: 'FAX', vi: 'Fax', en: 'Fax' }]
 }
-const addTypeLabel = (t) => (addTypeOptions.find(o => o.id === t) || {}).vi || t || '—'
+const addTypeLabel = (code) => {
+  const o = addTypeOptions.find(x => x.id === code)
+  return o ? tc(o) : (code || '—')
+}
 const infoTypeLabel = (addType, infoType) => {
   const list = infoTypeByAddType[addType] || []
-  return (list.find(o => o.id === infoType) || {}).vi || infoType || '—'
+  const o = list.find(x => x.id === infoType)
+  return o ? tc(o) : (infoType || '—')
 }
 const canManageContacts = computed(() => authStore.isMaker || authStore.isAdmin)
 

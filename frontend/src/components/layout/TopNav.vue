@@ -7,25 +7,31 @@
         <span class="logo-sub">SOFTWARE</span>
       </router-link>
      
-      <router-link v-if="authStore.isAdmin" to="/system-code" class="topnav-link" active-class="active">THAM SỐ HỆ THỐNG</router-link>
-      <router-link v-if="authStore.isAdmin" to="/users" class="topnav-link" active-class="active">QS NGƯỜI DÙNG</router-link>
-      <router-link to="/clients" class="topnav-link" active-class="active">KHÁCH HÀNG</router-link>
-      <router-link to="/contacts" class="topnav-link" active-class="active">LIÊN HỆ</router-link>
-      <router-link v-if="authStore.isMaker || authStore.isChecker" to="/maker-checker" class="topnav-link" active-class="active">PHÊ DUYỆT</router-link>
-      <router-link v-if="authStore.isAdmin" to="/audit" class="topnav-link" active-class="active">NHẬT KÝ HỆ THỐNG</router-link>
+      <router-link v-if="authStore.isAdmin" to="/system-code" class="topnav-link" active-class="active">{{ t('nav.systemParams') }}</router-link>
+      <router-link v-if="authStore.isAdmin" to="/users" class="topnav-link" active-class="active">{{ t('nav.users') }}</router-link>
+      <router-link to="/clients" class="topnav-link" active-class="active">{{ t('nav.clients') }}</router-link>
+      <router-link to="/contacts" class="topnav-link" active-class="active">{{ t('nav.contacts') }}</router-link>
+      <router-link v-if="authStore.isMaker || authStore.isChecker" to="/maker-checker" class="topnav-link" active-class="active">{{ t('nav.approval') }}</router-link>
+      <router-link v-if="authStore.isAdmin" to="/audit" class="topnav-link" active-class="active">{{ t('nav.auditLog') }}</router-link>
     </div>
    
     <div class="user-info">
       <div class="top-search">
-        <input type="text" placeholder="Tìm kiếm nhanh..." />
+        <input type="text" :placeholder="t('nav.quickSearch')" />
       </div>
-     
+
+      <div class="lang-switch">
+        <button :class="{ active: locale === 'vi' }" @click="setLocale('vi')">VN</button>
+        <span class="lang-sep">|</span>
+        <button :class="{ active: locale === 'en' }" @click="setLocale('en')">EN</button>
+      </div>
+
       <div class="user-profile">
         <div class="user-details">
           <span class="username">{{ authStore.currentUser?.username }}</span>
           <span class="role">{{ authStore.currentUser?.role }}</span>
         </div>
-        <button @click="handleLogout" class="logout-btn">Đăng xuất</button>
+        <button @click="handleLogout" class="logout-btn">{{ t('nav.logout') }}</button>
       </div>
     </div>
   </div>
@@ -34,9 +40,11 @@
 <script setup>
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
+import { useI18n } from '@/composables/useI18n'
 
 const authStore = useAuthStore()
 const router = useRouter()
+const { t, locale, setLocale } = useI18n()
 
 const handleLogout = () => {
   authStore.logout()
@@ -146,6 +154,20 @@ const handleLogout = () => {
 
 .username { font-weight: 600; font-size: 13.5px; }
 .role { font-size: 11px; color: #cbd5e1; }
+
+/* Bộ chuyển ngôn ngữ */
+.lang-switch { display: flex; align-items: center; gap: 4px; }
+.lang-switch button {
+  background: none;
+  border: none;
+  color: #cbd5e1;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 2px 4px;
+}
+.lang-switch button.active { color: white; text-decoration: underline; }
+.lang-sep { color: rgba(255,255,255,0.4); }
 
 .logout-btn {
   background: none;
