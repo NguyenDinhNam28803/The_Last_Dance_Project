@@ -22,20 +22,75 @@
       
       <!-- TAB 1: THÔNG TIN CHUNG -->
       <div v-show="currentTab === 'general'" class="tab-content">
-        <fieldset class="form-section">
+        <fieldset class="form-section" :disabled="isReadonly">
           <legend class="form-section-title">Thông tin khách hàng</legend>
-          <div class="row">
-            <div class="col col-3">
+          <div class="form-grid">
+            <div class="fld">
               <div style="display:flex; align-items:flex-end; gap:6px;">
                 <ValidationInput label="Mã khách hàng" required v-model="formData.clientId" :disabled="mode !== 'add'" :error="errors.clientId" style="flex:1;" />
                 <button v-if="mode === 'add'" type="button" class="btn btn-outline" title="Tự sinh mã" @click="generateClientId">#</button>
               </div>
             </div>
-            <div class="col col-4">
-              <ValidationInput label="Tên khách hàng" required v-model="formData.name" :disabled="mode === 'view'" :error="errors.name" />
+            <ValidationInput class="fld" label="Tên khách hàng" required v-model="formData.name" :disabled="isReadonly" :error="errors.name" />
+            <ValidationInput class="fld" label="Tên (ngôn ngữ khác)" v-model="formData.nameOther" :disabled="isReadonly" />
+            <ValidationInput class="fld" label="Tên viết tắt" v-model="formData.shortName" :disabled="isReadonly" />
+
+            <ValidationInput class="fld" label="Loại hình khách hàng" required :error="errors.registrationType">
+              <select v-model="formData.registrationType" class="form-control" :disabled="isReadonly">
+                <option value="">-- Chọn --</option>
+                <option v-for="o in registrationTypes" :key="o.id" :value="o.id">{{ o.vi }}</option>
+              </select>
+            </ValidationInput>
+            <ValidationInput class="fld" label="Quốc tịch" v-model="formData.nationality" :disabled="isReadonly" />
+
+            <ValidationInput v-if="isInstitution" class="fld" label="Loại tổ chức" required :error="errors.institutionType">
+              <select v-model="formData.institutionType" class="form-control" :disabled="isReadonly">
+                <option value="">-- Chọn --</option>
+                <option v-for="o in institutionOptions" :key="o.id" :value="o.id">{{ o.vi }}</option>
+              </select>
+            </ValidationInput>
+            <ValidationInput v-if="isForeign" class="fld" label="Investor code" required v-model="formData.investorCode" :disabled="isReadonly" :error="errors.investorCode" />
+
+            <ValidationInput v-if="isIndividual" class="fld" label="Giới tính" required :error="errors.gender">
+              <select v-model="formData.gender" class="form-control" :disabled="isReadonly">
+                <option value="">-- Chọn --</option>
+                <option value="M">Nam</option>
+                <option value="F">Nữ</option>
+                <option value="O">Khác</option>
+              </select>
+            </ValidationInput>
+            <ValidationInput v-if="isIndividual" class="fld" type="date" label="Ngày sinh" required v-model="formData.dateOfBirth" :disabled="isReadonly" :error="errors.dateOfBirth" />
+
+            <ValidationInput class="fld" label="Nơi sinh" v-model="formData.placeOfBirth" :disabled="isReadonly" />
+            <ValidationInput class="fld" label="Quốc gia cư trú" v-model="formData.residentCountryId" :disabled="isReadonly" />
+            <ValidationInput class="fld" label="Email" v-model="formData.email" :disabled="isReadonly" :error="errors.email" />
+            <ValidationInput class="fld" label="Số điện thoại" v-model="formData.phoneNumber" :disabled="isReadonly" />
+
+            <ValidationInput class="fld" label="Kênh mở TK">
+              <select v-model="formData.creationMethod" class="form-control" :disabled="isReadonly">
+                <option value="">-- Chọn --</option>
+                <option value="COUNTER">Tại quầy</option>
+                <option value="EKYC">EKYC</option>
+                <option value="BROKER">Qua môi giới</option>
+              </select>
+            </ValidationInput>
+            <div class="fld checkbox-fld">
+              <label><input type="checkbox" :checked="formData.isStaff === 'Y'" :disabled="isReadonly" @change="formData.isStaff = $event.target.checked ? 'Y' : 'N'" /> Nhân viên công ty</label>
             </div>
           </div>
-          <!-- (rest of the fields simplified for brevity, assume similar pattern) -->
+        </fieldset>
+
+        <!-- Trạng thái / thông tin sinh tự động (chỉ đọc) -->
+        <fieldset class="form-section">
+          <legend class="form-section-title">Trạng thái</legend>
+          <div class="form-grid">
+            <div class="fld">
+              <label class="form-label">Trạng thái bản ghi</label>
+              <span class="badge" :class="recordStatusBadge(formData.recordStatus)">{{ recordStatusLabel(formData.recordStatus) }}</span>
+            </div>
+            <div class="fld"><label class="form-label">Số TK lưu ký</label><div>{{ formData.custodyCd || '—' }}</div></div>
+            <div class="fld"><label class="form-label">FATCA</label><div>{{ formData.fatca === 'Y' ? 'Có' : 'Không' }}</div></div>
+          </div>
         </fieldset>
       </div>
       
@@ -96,15 +151,32 @@
         </div>
       </div>
 
+      <!-- Thanh hành động hàng loạt -->
+      <div v-if="canBulk && selectedRows.length > 0" class="bulk-bar">
+        <span>Đã chọn {{ selectedRows.length }} bản ghi</span>
+        <template v-if="authStore.isChecker || authStore.isAdmin">
+          <button class="btn btn-success btn-sm" @click="bulkApprove">Duyệt</button>
+          <button class="btn btn-danger btn-sm" @click="bulkReject">Từ chối</button>
+        </template>
+        <button v-if="authStore.isMaker || authStore.isAdmin" class="btn btn-outline btn-sm" @click="bulkDelete">Yêu cầu xóa</button>
+        <button class="btn btn-ghost btn-sm" @click="selectedRows = []">Bỏ chọn</button>
+      </div>
+
       <div class="grid-content">
         <table class="grid-table">
           <thead>
             <tr>
+              <th v-if="canBulk" class="checkbox-col">
+                <input type="checkbox" :checked="isAllPageSelected" @change="toggleAllPage" />
+              </th>
               <th v-for="col in grid.visibleColumns.value" :key="col.key">{{ col.label }}</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="cli in grid.paged.value" :key="cli.custId || cli.clientId" @click="selectClient(cli)">
+              <td v-if="canBulk" class="checkbox-col" @click.stop>
+                <input type="checkbox" :checked="selectedRows.includes(cli.custId)" @change="toggleRow(cli.custId)" />
+              </td>
               <td v-for="col in grid.visibleColumns.value" :key="col.key" :class="{ 'font-weight-bold': col.key === 'custId' }">
                 <span v-if="col.key === 'recordStatus'" class="badge" :class="recordStatusBadge(cli.recordStatus)">
                   {{ recordStatusLabel(cli.recordStatus) }}
@@ -113,7 +185,7 @@
               </td>
             </tr>
             <tr v-if="grid.paged.value.length === 0">
-              <td :colspan="grid.visibleColumns.value.length" class="empty-state">Không tìm thấy bản ghi nào</td>
+              <td :colspan="grid.visibleColumns.value.length + (canBulk ? 1 : 0)" class="empty-state">Không tìm thấy bản ghi nào</td>
             </tr>
           </tbody>
         </table>
@@ -170,6 +242,15 @@ import { useNotify } from '@/composables/useNotify'
 import { ImportExportService, ClientService } from '@/services/api'
 import { recordStatusLabel, recordStatusBadge } from '@/constants/recordStatus'
 import { useDataGrid } from '@/composables/useDataGrid'
+import { institutionTypesByScope } from '@/constants/institutionType'
+
+// Loại hình khách hàng (URD)
+const registrationTypes = [
+  { id: 'LOCAL_RETAIL', vi: 'Cá nhân trong nước' },
+  { id: 'FOREIGN_RETAIL', vi: 'Cá nhân nước ngoài' },
+  { id: 'LOCAL_INSTITUTION', vi: 'Tổ chức trong nước' },
+  { id: 'FOREIGN_INSTITUTION', vi: 'Tổ chức nước ngoài' }
+]
 
 const clientStore = useClientStore()
 const authStore = useAuthStore()
@@ -203,6 +284,15 @@ const grid = useDataGrid({
   userId: authStore.user?.id || 'anon'
 })
 
+// Các computed điều kiện theo loại hình khách hàng
+const isReadonly = computed(() => mode.value === 'view')
+const isInstitution = computed(() => (formData.value.registrationType || '').includes('INSTITUTION'))
+const isForeign = computed(() => (formData.value.registrationType || '').includes('FOREIGN'))
+const isIndividual = computed(() => (formData.value.registrationType || '').includes('RETAIL'))
+const institutionOptions = computed(() =>
+  institutionTypesByScope(isForeign.value ? 'FOREIGN' : 'DOMESTIC')
+)
+
 // Lấy giá trị ô hiển thị (xử lý riêng Mã KH dùng custId hoặc clientId)
 const cellValue = (cli, key) => {
   if (key === 'custId') return cli.custId || cli.clientId || ''
@@ -221,6 +311,7 @@ const toDisplayDate = (iso) => iso
 const selectClient = (cli) => {
   formData.value = {
     ...cli,
+    clientId: cli.custId || cli.clientId,
     dateOfBirth: toDateInput(cli.dateOfBirth),
     createdDateDisplay: toDisplayDate(cli.createdDate),
   }
@@ -257,13 +348,33 @@ const generateClientId = async () => {
 
 const validate = () => {
   const e = {}
-  if (!formData.value.userName?.trim()) e.userName = 'Bắt buộc nhập'
-  if (!formData.value.name?.trim()) e.name = 'Bắt buộc nhập'
-  if (!formData.value.email?.trim()) e.email = 'Bắt buộc nhập'
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.email))
-    e.email = 'Email không hợp lệ'
+  const f = formData.value
+  if (mode.value === 'add' && !f.clientId?.trim()) e.clientId = 'Bắt buộc nhập (hoặc bấm #)'
+  if (!f.name?.trim()) e.name = 'Bắt buộc nhập'
+  if (!f.registrationType) e.registrationType = 'Bắt buộc chọn'
+  if (f.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) e.email = 'Email không hợp lệ'
+
+  if (isIndividual.value) {
+    if (!f.gender) e.gender = 'Bắt buộc với KH cá nhân'
+    if (!f.dateOfBirth) e.dateOfBirth = 'Bắt buộc với KH cá nhân'
+    else if (!isAdult(f.dateOfBirth)) e.dateOfBirth = 'Khách hàng phải đủ 18 tuổi'
+  }
+  if (isInstitution.value && !f.institutionType) e.institutionType = 'Bắt buộc với KH tổ chức'
+  if (isForeign.value && !f.investorCode?.trim()) e.investorCode = 'Bắt buộc với KH nước ngoài'
+
   errors.value = e
   return Object.keys(e).length === 0
+}
+
+// Kiểm tra đủ 18 tuổi
+const isAdult = (dob) => {
+  const d = new Date(dob)
+  if (isNaN(d)) return false
+  const now = new Date()
+  let age = now.getFullYear() - d.getFullYear()
+  const m = now.getMonth() - d.getMonth()
+  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--
+  return age >= 18
 }
 
 // Toolbar động theo vai trò (URD: Maker vs Checker)
@@ -285,14 +396,20 @@ const handleToolbarAction = async (action) => {
     mode.value = 'add'
     formData.value = {}
   } else if (action === 'save') {
-    if (!validate()) return
+    if (!validate()) { notify.warn('Vui lòng kiểm tra lại các trường bắt buộc'); return }
     try {
-        if (mode.value === 'add') await clientStore.create(formData.value)
-        else await clientStore.update(formData.value.custId, formData.value)
-        alert('Lưu thành công!')
+        if (mode.value === 'add') {
+          await clientStore.create(formData.value)
+          notify.success('Tạo khách hàng thành công (chờ duyệt)')
+        } else {
+          await clientStore.update(formData.value.custId || formData.value.clientId, formData.value)
+          notify.success('Cập nhật thành công (chờ duyệt)')
+        }
         mode.value = 'view'
         await clientStore.fetchAll()
-    } catch (e) { alert('Lỗi') }
+    } catch (e) {
+        notify.error(e.response?.data?.message || 'Lưu thất bại')
+    }
   } else if (action === 'export') {
     await exportExcel()
   } else if (action === 'import') {
@@ -366,6 +483,48 @@ const requestDeleteClient = async () => {
   } catch (e) {
     notify.error(e.response?.data?.message || 'Yêu cầu xóa thất bại')
   }
+}
+
+// ===== Chọn nhiều bản ghi (bulk) =====
+const selectedRows = ref([])
+const canBulk = computed(() => authStore.isChecker || authStore.isMaker || authStore.isAdmin)
+const isAllPageSelected = computed(() => {
+  const ids = grid.paged.value.map(c => c.custId)
+  return ids.length > 0 && ids.every(id => selectedRows.value.includes(id))
+})
+const toggleRow = (id) => {
+  if (selectedRows.value.includes(id)) selectedRows.value = selectedRows.value.filter(x => x !== id)
+  else selectedRows.value = [...selectedRows.value, id]
+}
+const toggleAllPage = () => {
+  const ids = grid.paged.value.map(c => c.custId)
+  if (isAllPageSelected.value) selectedRows.value = selectedRows.value.filter(id => !ids.includes(id))
+  else selectedRows.value = [...new Set([...selectedRows.value, ...ids])]
+}
+
+// Chạy 1 thao tác theo lô và báo cáo kết quả
+const runBulk = async (ids, fn, verb) => {
+  const results = await Promise.allSettled(ids.map(id => fn(id)))
+  const ok = results.filter(r => r.status === 'fulfilled').length
+  const fail = results.length - ok
+  if (fail === 0) notify.success(`${verb} thành công ${ok} bản ghi`)
+  else notify.warn(`${verb}: thành công ${ok}, thất bại ${fail}`)
+  selectedRows.value = []
+  await clientStore.fetchAll()
+}
+const bulkApprove = async () => {
+  if (!confirm(`Duyệt ${selectedRows.value.length} bản ghi đã chọn?`)) return
+  await runBulk([...selectedRows.value], (id) => ClientService.approve(id), 'Duyệt')
+}
+const bulkReject = async () => {
+  const reason = prompt('Nhập lý do từ chối (áp dụng cho tất cả bản ghi đã chọn):')
+  if (reason === null) return
+  if (!reason.trim()) { notify.warn('Lý do từ chối là bắt buộc'); return }
+  await runBulk([...selectedRows.value], (id) => ClientService.reject(id, reason.trim()), 'Từ chối')
+}
+const bulkDelete = async () => {
+  if (!confirm(`Gửi yêu cầu xóa ${selectedRows.value.length} bản ghi đã chọn?`)) return
+  await runBulk([...selectedRows.value], (id) => ClientService.requestDelete(id), 'Yêu cầu xóa')
 }
 
 const auditRows = ref([])
@@ -568,4 +727,32 @@ const handleFileUpload = async (event) => {
   text-align: left;
 }
 .audit-table thead th { background: #f9fafb; }
+
+/* Form lưới 2 cột */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+}
+.fld { min-width: 0; }
+.checkbox-fld { display: flex; align-items: center; }
+.checkbox-fld label { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+
+/* Thanh hành động hàng loạt */
+.bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #eff6ff;
+  border-bottom: 1px solid #bfdbfe;
+  font-size: 13px;
+}
+.checkbox-col { width: 36px; text-align: center; }
+
+/* Biến thể nút (phòng khi chưa có ở global) */
+.btn-success { background: #10b981; color: #fff; border: 1px solid #10b981; }
+.btn-danger { background: #ef4444; color: #fff; border: 1px solid #ef4444; }
+.btn-primary { background: #2563eb; color: #fff; border: 1px solid #2563eb; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
 </style>

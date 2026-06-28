@@ -153,9 +153,34 @@ Các quy tắc nghiệp vụ URD mục 3.2, đăng ký DI trong `Program.cs`:
 - **Popup Audit trail** hiển thị lịch sử thay đổi (thời gian, hành động, trạng thái, maker, checker, mô tả) với nhãn tiếng Việt.
 
 ### Còn lại
-- Luồng Edit Active → PendingUpdate (cần màn sửa Client hoàn chỉnh).
-- Duyệt/Từ chối/Hủy hàng loạt (bulk) trên grid.
 - Chức năng Copy record.
+- Bulk trong 1 transaction phía backend (hiện điều phối phía frontend).
+
+---
+
+## 9. Phase 5 — Sửa Client đầy đủ (Edit → PendingUpdate) + Thao tác hàng loạt
+
+> Frontend **đã build kiểm chứng** ✅ (ClientView ~28.7kB). Backend cần `dotnet build`.
+
+### A. Màn sửa Client đầy đủ (Edit → PendingUpdate)
+**Backend:**
+- `UserResponseDto` mở rộng: RegistrationType, InstitutionType, InvestorCode, PlaceOfBirth, IsStaff, CreationMethod, CustodyCd, FATCA (+ cập nhật `MapToResponseDto`) → form round-trip đủ dữ liệu.
+- `ClientUpdateDto` + `UpdateClientAsync`: sửa bản **Active/Rejected/PendingUpdate → PendingUpdate**; bản **PendingInsert giữ nguyên**; recompute CustodyID/FATCA; chặn tuổi <18 (cá nhân); log MTTRAN. 
+- Endpoint **`PUT /User/Client/{id}`**.
+
+**Frontend (`ClientView` tab Thông tin chung):**
+- Dựng form đầy đủ: Mã KH, Tên (+ngôn ngữ khác, viết tắt), Loại hình KH, Quốc tịch, **Loại tổ chức** (hiện theo KH tổ chức, lọc theo trong/ngoài nước), **Investor code** (KH nước ngoài), **Giới tính + Ngày sinh** (KH cá nhân), Nơi sinh, Quốc gia cư trú, Email, SĐT, Kênh mở TK, NV công ty; khối Trạng thái (badge + CustodyID + FATCA, chỉ đọc).
+- Validate client-side theo loại hình (đủ 18 tuổi, investor code, loại tổ chức…).
+- Edit nạp bản ghi → sửa → Save gọi `PUT` → PendingUpdate; báo lỗi từ server.
+
+### B. Thao tác hàng loạt (bulk) trên grid
+- Cột checkbox + chọn-tất-c-trang; thanh hành động hiện khi có lựa chọn.
+- **Checker/Admin**: Duyệt / Từ chối hàng loạt (một lý do dùng chung). **Maker/Admin**: Yêu cầu xóa hàng loạt.
+- Điều phối bằng `Promise.allSettled`, báo cáo số thành công/thất bại, tự làm mới danh sách.
+
+### Còn lại
+- Copy record (tạo nhanh từ bản ghi có sẵn).
+- Bulk gói trong 1 transaction backend (hiện gọi tuần tự nhiều request).
 
 ---
 

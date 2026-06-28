@@ -124,6 +124,24 @@ namespace The_Last_Dance_Project.Controllers
             }
         }
 
+        // MAKER: Cập nhật Khách hàng (Client) -> chuyển Chờ duyệt sửa
+        [HttpPut("Client/{id}")]
+        [Authorize(Roles = "Administrator,Maker")]
+        public async Task<IActionResult> UpdateClient(string id, [FromBody] ClientUpdateDto dto)
+        {
+            var makerId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "SYSTEM";
+            try
+            {
+                var result = await _userService.UpdateClientAsync(id, dto, makerId);
+                if (result == null) return NotFound(new { message = "Không tìm thấy khách hàng." });
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         // CHECKER: Duyệt bản ghi Client
         [HttpPost("Client/{id}/approve")]
         [Authorize(Roles = "Administrator,Checker")]

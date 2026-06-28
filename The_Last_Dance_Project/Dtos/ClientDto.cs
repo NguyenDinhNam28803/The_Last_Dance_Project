@@ -54,4 +54,30 @@ namespace The_Last_Dance_Project.Dtos
     {
         public string Reason { get; set; } = string.Empty;
     }
+
+    /// <summary>DTO cập nhật Khách hàng (Client). Mã khách hàng không được sửa.</summary>
+    public class ClientUpdateDto
+    {
+        [Required]
+        [StringLength(50)]
+        public string Name { get; set; } = string.Empty;
+
+        public string? NameOther { get; set; }
+        public string? ShortName { get; set; }
+
+        [Required]
+        public string RegistrationType { get; set; } = string.Empty;
+
+        public string? Nationality { get; set; }
+        public string? InstitutionType { get; set; }
+        public string? InvestorCode { get; set; }
+        public string? Gender { get; set; }
+        public string? DateOfBirth { get; set; }
+        public string? PlaceOfBirth { get; set; }
+        public string? ResidentCountryId { get; set; }
+        public string? IsStaff { get; set; }
+        public string? CreationMethod { get; set; }
+        public string? Email { get; set; }
+        public string? PhoneNumber { get; set; }
+    }
 }

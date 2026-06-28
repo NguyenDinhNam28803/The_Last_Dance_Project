@@ -21,6 +21,16 @@ namespace The_Last_Dance_Project.Dtos
         public string? ResidentCountryId { get; set; }
         public DateTime? CreatedDate { get; set; }
         public string? CreatedBy { get; set; }
+
+        // Trường nghiệp vụ Client (phân hệ Khách hàng chứng khoán)
+        public string? RegistrationType { get; set; }
+        public string? InstitutionType { get; set; }
+        public string? InvestorCode { get; set; }
+        public string? PlaceOfBirth { get; set; }
+        public string? IsStaff { get; set; }
+        public string? CreationMethod { get; set; }
+        public string? CustodyCd { get; set; }
+        public string? FATCA { get; set; }
     }
 
     public class UserCreateDto

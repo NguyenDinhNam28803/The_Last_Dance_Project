@@ -43,7 +43,15 @@ namespace The_Last_Dance_Project.Services
                 Nationality = c.Nationality,
                 ResidentCountryId = c.ResidentCountryId,
                 CreatedDate = c.CreatedDate,
-                CreatedBy = c.CreatedBy
+                CreatedBy = c.CreatedBy,
+                RegistrationType = c.RegistrationType,
+                InstitutionType = c.InstitutionTypeId,
+                InvestorCode = c.InvestorCode,
+                PlaceOfBirth = c.PlaceOfBirth,
+                IsStaff = c.IsStaff,
+                CreationMethod = c.OpenVia,
+                CustodyCd = c.CustodyCd,
+                FATCA = c.FATCA
             };
         }
         #endregion
@@ -254,6 +262,59 @@ namespace The_Last_Dance_Project.Services
             await _db.SaveChangesAsync();
 
             return await GetByIdAsync(clientId) ?? MapToResponseDto(client);
+        }
+
+        // MAKER: Cập nhật Khách hàng. Sửa bản Active/Rejected -> Chờ duyệt sửa; sửa bản Chờ duyệt thêm -> giữ nguyên.
+        public async Task<UserResponseDto?> UpdateClientAsync(string id, ClientUpdateDto dto, string makerId)
+        {
+            var client = await _db.Customers.FindAsync(id);
+            if (client == null) return null;
+
+            var status = client.RecordStatus;
+            var editable = status == RecordStatus.PendingInsert
+                           || status == RecordStatus.PendingUpdate
+                           || status == RecordStatus.Active
+                           || status == RecordStatus.Rejected;
+            if (!editable)
+                throw new InvalidOperationException("Chỉ được sửa bản ghi ở trạng thái Chờ duyệt thêm/sửa, Đã duyệt hoặc Từ chối.");
+
+            // KH cá nhân phải đủ 18 tuổi
+            var isIndividual = (dto.RegistrationType ?? string.Empty).ToUpperInvariant().Contains("RETAIL");
+            if (isIndividual && !_clientCodeService.IsAtLeast18(dto.DateOfBirth))
+                throw new InvalidOperationException("Khách hàng cá nhân phải đủ 18 tuổi.");
+
+            client.Name = dto.Name;
+            client.NameOther = dto.NameOther;
+            client.ShortName = dto.ShortName;
+            client.RegistrationType = dto.RegistrationType;
+            client.Nationality = dto.Nationality;
+            client.InstitutionTypeId = dto.InstitutionType;
+            client.InvestorCode = dto.InvestorCode;
+            client.Gender = dto.Gender;
+            client.DateOfBirth = dto.DateOfBirth;
+            client.PlaceOfBirth = dto.PlaceOfBirth;
+            client.ResidentCountryId = dto.ResidentCountryId;
+            client.IsStaff = dto.IsStaff;
+            client.OpenVia = dto.CreationMethod;
+            client.Email = dto.Email;
+            client.PhoneNumber = dto.PhoneNumber;
+
+            // Cập nhật lại CustodyID & FATCA theo dữ liệu mới
+            client.CustodyCd = _clientCodeService.GenerateCustodyId(dto.RegistrationType, id);
+            client.FATCA = _clientCodeService.DetectFatca(dto.Nationality) ? "Y" : "N";
+
+            // Chuyển trạng thái: Active/Rejected/PendingUpdate -> Chờ duyệt sửa; PendingInsert giữ nguyên
+            if (status != RecordStatus.PendingInsert)
+                client.RecordStatus = RecordStatus.PendingUpdate;
+
+            client.LastChangeBy = makerId;
+            client.LastChangeDate = DateTime.UtcNow;
+
+            await LogClientAuditAsync(id, TransactionType.Update, TransactionStatus.Pending,
+                maker: makerId, checker: null, description: "Cập nhật khách hàng (chờ duyệt)");
+
+            await _db.SaveChangesAsync();
+            return await GetByIdAsync(id);
         }
 
         // CHECKER: Duyệt bản ghi Client (Chờ duyệt thêm/sửa -> Đã duyệt; Chờ duyệt xóa -> Đã xóa)

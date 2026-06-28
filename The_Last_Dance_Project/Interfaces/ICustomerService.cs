@@ -27,6 +27,8 @@ namespace The_Last_Dance_Project.Interfaces
         Task<string> GenerateNextClientIdAsync();
         Task<UserResponseDto> CreateClientAsync(ClientCreateDto dto, string makerId);
 
+        Task<UserResponseDto?> UpdateClientAsync(string id, ClientUpdateDto dto, string makerId);
+
         // Maker-Checker trên bản ghi Client
         Task<bool> ApproveClientAsync(string id, string checkerId);
         Task<bool> RejectClientAsync(string id, string checkerId, string reason);
