@@ -269,9 +269,11 @@ const roles = [
 // ── State ───────────────────────────────────────────
 import { useUserStore } from '@/stores/user'
 import { useAuthStore } from '@/stores/auth'
+import { useI18n } from '@/composables/useI18n'
 
 const userStore = useUserStore()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 const users = computed(() => userStore.users ?? [])
 const loading       = computed(() => userStore.loading)
@@ -290,7 +292,7 @@ const sortDir       = ref('asc')
 const panelTitle = computed(() => {
   if (mode.value === 'add')  return 'Thêm tài khoản mới'
   if (mode.value === 'edit') return 'Chỉnh sửa — ' + (selectedUser.value?.userName ?? '')
-  return 'Quản lý Người Dùng'
+  return t('page.users')
 })
 
 const filteredUsers = computed(() => {

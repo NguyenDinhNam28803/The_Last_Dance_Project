@@ -1,40 +1,40 @@
 <template>
   <div class="main-content flex-column">
-    <Toolbar 
-      title="Nhật ký hệ thống (Audit Trail)" 
-      :features="['Search', 'Refresh']" 
+    <Toolbar
+      :title="t('audit.title')"
+      :features="['Search', 'Refresh']"
       @action="handleAction"
     />
-    
+
     <div class="filter-bar p-3 bg-white border-bottom">
       <div class="row align-items-end">
         <div class="col col-3">
-          <ValidationInput type="date" label="Từ ngày" v-model="filters.fromDate" />
+          <ValidationInput type="date" :label="t('audit.fromDate')" v-model="filters.fromDate" />
         </div>
         <div class="col col-3">
-          <ValidationInput type="date" label="Đến ngày" v-model="filters.toDate" />
+          <ValidationInput type="date" :label="t('audit.toDate')" v-model="filters.toDate" />
         </div>
         <div class="col col-3">
-          <ValidationInput label="Người thực hiện (Maker)" v-model="filters.maker" />
+          <ValidationInput :label="t('audit.maker')" v-model="filters.maker" />
         </div>
         <div class="col col-3">
-          <button class="btn btn-primary" @click="handleAction('search')"><i class="fas fa-search"></i> Tìm kiếm</button>
+          <button class="btn btn-primary" @click="handleAction('search')"><i class="fas fa-search"></i> {{ t('audit.search') }}</button>
         </div>
       </div>
     </div>
-    
-    <div v-if="auditStore.loading" class="text-center p-5">Đang tải nhật ký...</div>
+
+    <div v-if="auditStore.loading" class="text-center p-5">{{ t('audit.loading') }}</div>
     <div v-else class="grid-content bg-white flex-1 p-3" style="overflow-y:auto">
       <table class="grid-table">
         <thead>
           <tr>
             <th width="40"></th>
-            <th>Thời gian</th>
-            <th>Đối tượng</th>
-            <th>Loại tác động</th>
-            <th>Maker</th>
-            <th>Checker</th>
-            <th>Trạng thái</th>
+            <th>{{ t('audit.time') }}</th>
+            <th>{{ t('audit.object') }}</th>
+            <th>{{ t('audit.actionType') }}</th>
+            <th>{{ t('audit.maker') }}</th>
+            <th>{{ t('audit.checker') }}</th>
+            <th>{{ t('col.recordStatus') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -54,13 +54,13 @@
             </tr>
             <tr v-if="log.expanded" class="expanded-row bg-light">
               <td colspan="7" class="p-3">
-                <h6 class="text-primary font-weight-bold mb-2">Chi tiết thay đổi (History change)</h6>
+                <h6 class="text-primary font-weight-bold mb-2">{{ t('audit.detailTitle') }}</h6>
                 <table class="data-table">
                   <thead>
                     <tr>
-                      <th>Trường thông tin</th>
-                      <th>Giá trị cũ (Old Value)</th>
-                      <th>Giá trị mới (New Value)</th>
+                      <th>{{ t('audit.field') }}</th>
+                      <th>{{ t('audit.oldVal') }}</th>
+                      <th>{{ t('audit.newVal') }}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -86,7 +86,9 @@ import { useNotify } from '@/composables/useNotify'
 import Toolbar from '@/components/common/Toolbar.vue'
 import ValidationInput from '@/components/common/ValidationInput.vue'
 import { useAuditStore } from '@/stores/system'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const auditStore = useAuditStore()
 const filters = ref({ fromDate: '', toDate: '', maker: '' })
 

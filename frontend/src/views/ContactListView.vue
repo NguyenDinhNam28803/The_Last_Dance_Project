@@ -2,10 +2,10 @@
   <div class="contact-list">
     <div class="page-header">
       <div>
-        <h1 class="page-title">Thông tin liên hệ</h1>
-        <p class="page-subtitle">Quản lý thông tin liên hệ khách hàng</p>
+        <h1 class="page-title">{{ t('page.contacts') }}</h1>
+        <p class="page-subtitle">{{ t('dash.contactInfo') }}</p>
       </div>
-      <button v-if="authStore.isMaker || authStore.isAdmin" class="btn btn-primary" @click="openCreateModal">➕ Thêm liên hệ</button>
+      <button v-if="authStore.isMaker || authStore.isAdmin" class="btn btn-primary" @click="openCreateModal">{{ t('contact.add') }}</button>
     </div>
 
     <!-- Loading State -->
@@ -155,10 +155,12 @@ import { useCustomerContactStore } from '@/stores/customerContact'
 import { useAuthStore } from '@/stores/auth'
 import { addTypeLabels } from '../data/mockData'
 import { useNotify } from '@/composables/useNotify'
+import { useI18n } from '@/composables/useI18n'
 
 const contactStore = useCustomerContactStore()
 const authStore = useAuthStore()
 const notify = useNotify()
+const { t } = useI18n()
 const search = ref('')
 const filterType = ref('')
 const showModal = ref(false)

@@ -6,7 +6,7 @@
       <div class="panel-header">
         <span class="panel-title">
           <i class="fas fa-sliders-h"></i>
-          {{ valueMode !== 'view' ? 'Giá Trị' : (codeMode !== 'view' ? 'Tham Số' : 'Tham Số Hệ Thống') }}
+          {{ valueMode !== 'view' ? 'Giá Trị' : (codeMode !== 'view' ? 'Tham Số' : t('page.systemCode')) }}
         </span>
         <div class="toolbar-actions">
           <!-- Code toolbar -->
@@ -268,6 +268,9 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 // ── State ──────────────────────────────────────────
 const codes        = ref([])

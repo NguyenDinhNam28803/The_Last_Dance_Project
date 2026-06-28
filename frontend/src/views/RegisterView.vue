@@ -8,8 +8,8 @@
       <div class="auth-card">
         <div class="auth-header">
           <div class="auth-logo">💃</div>
-          <h1>Đăng ký</h1>
-          <p>Tạo tài khoản mới trên hệ thống</p>
+          <h1>{{ t('reg.title') }}</h1>
+          <p>{{ t('reg.subtitle') }}</p>
         </div>
 
         <div v-if="error" class="auth-error">⚠️ {{ error }}</div>
@@ -17,29 +17,29 @@
 
         <form @submit.prevent="handleRegister" class="auth-form">
           <div class="form-group">
-            <label class="form-label">Tên đăng nhập <span class="required">*</span></label>
-            <input v-model="form.userName" type="text" class="form-control" placeholder="Ít nhất 3 ký tự" required />
+            <label class="form-label">{{ t('reg.username') }} <span class="required">*</span></label>
+            <input v-model="form.userName" type="text" class="form-control" :placeholder="t('reg.usernameHint')" required />
           </div>
           <div class="form-group">
-            <label class="form-label">Mật khẩu <span class="required">*</span></label>
-            <input v-model="form.password" type="password" class="form-control" placeholder="Ít nhất 6 ký tự" required />
+            <label class="form-label">{{ t('auth.password') }} <span class="required">*</span></label>
+            <input v-model="form.password" type="password" class="form-control" :placeholder="t('reg.passwordHint')" required />
           </div>
           <div class="form-group">
-            <label class="form-label">Email <span class="required">*</span></label>
+            <label class="form-label">{{ t('field.email') }} <span class="required">*</span></label>
             <input v-model="form.email" type="email" class="form-control" placeholder="example@email.com" required />
           </div>
           <div class="form-group">
-            <label class="form-label">Số điện thoại <span class="required">*</span></label>
+            <label class="form-label">{{ t('reg.phone') }} <span class="required">*</span></label>
             <input v-model="form.phoneNumber" type="tel" class="form-control" placeholder="09xxxxxxxx" required />
           </div>
 
           <button type="submit" class="btn btn-primary btn-full" :disabled="loading">
-            {{ loading ? '⏳ Đang xử lý...' : '📝 Đăng ký' }}
+            {{ loading ? ('⏳ ' + t('auth.processing')) : ('📝 ' + t('reg.submit')) }}
           </button>
         </form>
 
         <div class="auth-footer">
-          <p>Đã có tài khoản? <router-link to="/login">Đăng nhập</router-link></p>
+          <p>{{ t('reg.haveAccount') }} <router-link to="/login">{{ t('auth.loginBtn') }}</router-link></p>
         </div>
       </div>
     </div>
@@ -50,9 +50,11 @@
 import { ref, reactive } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { useNotify } from '@/composables/useNotify'
+import { useI18n } from '@/composables/useI18n'
 
 const auth = useAuthStore()
 const notify = useNotify()
+const { t } = useI18n()
 const form = reactive({ userName: '', password: '', email: '', phoneNumber: '' })
 const loading = ref(false)
 const error = ref('')

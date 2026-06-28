@@ -2,8 +2,8 @@
   <div class="dashboard">
     <div class="page-header">
       <div>
-        <h1 class="page-title">Dashboard</h1>
-        <p class="page-subtitle">Tổng quan hệ thống</p>
+        <h1 class="page-title">{{ t('dash.title') }}</h1>
+        <p class="page-subtitle">{{ t('dash.subtitle') }}</p>
       </div>
     </div>
     
@@ -11,25 +11,25 @@
       <div class="stat-card">
         <div class="stat-info">
           <h3>{{ stats.totalUsers }}</h3>
-          <p>Tổng người dùng</p>
+          <p>{{ t('dash.totalUsers') }}</p>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-info">
           <h3>{{ stats.activeUsers }}</h3>
-          <p>Đang hoạt động</p>
+          <p>{{ t('dash.active') }}</p>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-info">
           <h3>{{ stats.pendingRequests }}</h3>
-          <p>Chờ phê duyệt</p>
+          <p>{{ t('dash.pending') }}</p>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-info">
           <h3>{{ stats.inactiveUsers }}</h3>
-          <p>Ngừng hoạt động</p>
+          <p>{{ t('dash.inactive') }}</p>
         </div>
       </div>
     </div>
@@ -37,17 +37,17 @@
     <div class="dashboard-grid">
       <div class="card">
         <div class="card-header">
-          <h2>Hoạt động gần đây</h2>
+          <h2>{{ t('dash.recent') }}</h2>
         </div>
         <div class="card-body">
           <div class="activity-list">
             <div v-for="log in recentLogs" :key="log.mtTranId" class="activity-item">
               <div class="activity-content">
-                <p><strong>{{ log.maker }}</strong> đã {{ getTypeAction(log.mtlType) }} <span class="activity-obj">{{ log.objChange }}</span></p>
+                <p><strong>{{ log.maker }}</strong> {{ getTypeAction(log.mtlType) }} <span class="activity-obj">{{ log.objChange }}</span></p>
                 <span class="activity-time">{{ formatDate(log.actionDate) }}</span>
               </div>
               <span class="status-badge" :class="log.mtlStatus === 'A' ? 'success' : 'warning'">
-                {{ log.mtlStatus === 'A' ? 'Đã duyệt' : 'Chờ duyệt' }}
+                {{ log.mtlStatus === 'A' ? t('dash.approved') : t('dash.pendingShort') }}
               </span>
             </div>
           </div>
@@ -56,14 +56,14 @@
       
       <div class="card">
         <div class="card-header">
-          <h2>Thao tác nhanh</h2>
+          <h2>{{ t('dash.quickActions') }}</h2>
         </div>
         <div class="card-body">
           <div class="quick-actions">
-            <router-link to="/users" class="quick-action-item">Quản lý người dùng</router-link>
-            <router-link to="/contacts" class="quick-action-item">Thông tin liên hệ</router-link>
-            <router-link to="/maker-checker" class="quick-action-item">Phê duyệt yêu cầu</router-link>
-            <router-link to="/audit" class="quick-action-item">Nhật ký hệ thống</router-link>
+            <router-link to="/users" class="quick-action-item">{{ t('dash.manageUsers') }}</router-link>
+            <router-link to="/contacts" class="quick-action-item">{{ t('dash.contactInfo') }}</router-link>
+            <router-link to="/maker-checker" class="quick-action-item">{{ t('dash.approveReq') }}</router-link>
+            <router-link to="/audit" class="quick-action-item">{{ t('nav.auditLog') }}</router-link>
           </div>
         </div>
       </div>
@@ -75,8 +75,10 @@
 import { computed } from 'vue'
 import { mockUsers, mockAuditLogs } from '../data/mockData'
 import { useAuthStore } from '@/stores/auth'
+import { useI18n } from '@/composables/useI18n'
 
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 const stats = computed(() => ({
   totalUsers: mockUsers.length,
@@ -88,8 +90,8 @@ const stats = computed(() => ({
 const recentLogs = computed(() => mockAuditLogs.slice(0, 5))
 
 const getTypeAction = (type) => {
-  const actions = { C: 'tạo mới', E: 'chỉnh sửa', D: 'xóa' }
-  return actions[type] || 'thao tác'
+  const actions = { C: t('dash.actCreate'), E: t('dash.actEdit'), D: t('dash.actDelete') }
+  return actions[type] || t('dash.actDo')
 }
 
 const formatDate = (dateStr) => {

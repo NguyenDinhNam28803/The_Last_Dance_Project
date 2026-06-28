@@ -3,7 +3,7 @@
     <div class="login-header">
       <div class="logo">
         <span class="logo-text">NAVI <span class="fw-light">SOFTWARE</span></span>
-        <span class="company-name">Công ty Cổ phần Giải pháp và Dịch vụ phần mềm Nam Việt</span>
+        <span class="company-name">{{ t('auth.companyName') }}</span>
       </div>
       <div class="partners">
         <img src="https://fpt.vn/storage/upload/images/logo/fpt_logo.png" alt="FPT" height="40" v-if="false" /> <!-- Mock partner logo -->
@@ -14,12 +14,12 @@
 
     <div class="login-wrapper">
       <div class="login-box">
-        <h2 class="sys-title">Hệ thống BO</h2>
-        
+        <h2 class="sys-title">{{ t('auth.sysTitle') }}</h2>
+
         <form @submit.prevent="handleLogin" class="login-form">
           <ValidationInput
             v-model="username"
-            placeholder="Tài khoản"
+            :placeholder="t('auth.username')"
             :error="errors.username"
             @blur="validateUsername"
           >
@@ -31,7 +31,7 @@
           <ValidationInput
             v-model="password"
             :type="showPassword ? 'text' : 'password'"
-            placeholder="Mật khẩu"
+            :placeholder="t('auth.password')"
             :error="errors.password"
             @blur="validatePassword"
           >
@@ -45,12 +45,12 @@
             <label class="custom-checkbox">
               <input type="checkbox" v-model="rememberMe" />
               <span class="checkmark"></span>
-              Ghi nhớ mật khẩu
+              {{ t('auth.remember') }}
             </label>
           </div>
 
           <button type="submit" class="btn btn-login" :disabled="authStore.loading || !isValid">
-            {{ authStore.loading ? 'Đang xử lý...' : 'Đăng nhập' }}
+            {{ authStore.loading ? t('auth.processing') : t('auth.loginBtn') }}
           </button>
         </form>
         
@@ -67,9 +67,11 @@ import { ref, computed, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import ValidationInput from '@/components/common/ValidationInput.vue'
+import { useI18n } from '@/composables/useI18n'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 const username = ref('')
 const password = ref('')
@@ -92,7 +94,7 @@ onMounted(() => {
 
 const validateUsername = () => {
   if (!username.value) {
-    errors.username = 'Tài khoản không được để trống'
+    errors.username = t('auth.usernameRequired')
     return false
   }
   errors.username = ''
@@ -101,7 +103,7 @@ const validateUsername = () => {
 
 const validatePassword = () => {
   if (!password.value) {
-    errors.password = 'Mật khẩu không được để trống'
+    errors.password = t('auth.passwordRequired')
     return false
   }
   errors.password = ''

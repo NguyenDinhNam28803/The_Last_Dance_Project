@@ -1,28 +1,28 @@
 <template>
   <div class="main-content flex-column">
-    <Toolbar 
-      title="Phê Duyệt (Maker - Checker)" 
-      :features="toolbarFeatures" 
+    <Toolbar
+      :title="t('mc.title')"
+      :features="toolbarFeatures"
       @action="handleAction"
     />
-    
+
     <div class="filter-bar p-3 bg-white border-bottom">
       <div class="row align-items-end">
         <div class="col col-3">
-          <ValidationInput label="Mã giao dịch (Trans ID)" v-model="filters.transId" />
+          <ValidationInput :label="t('mc.transId')" v-model="filters.transId" />
         </div>
         <div class="col col-3">
           <div class="form-group">
-            <label class="form-label">Loại nghiệp vụ</label>
+            <label class="form-label">{{ t('mc.bizType') }}</label>
             <select class="form-control" v-model="filters.type">
-              <option value="">Tất cả</option>
-              <option value="CustomerContact">Liên hệ khách hàng</option>
-              <option value="Customer">Khách hàng</option>
+              <option value="">{{ t('mc.all') }}</option>
+              <option value="CustomerContact">{{ t('mc.custContact') }}</option>
+              <option value="Customer">{{ t('mc.customer') }}</option>
             </select>
           </div>
         </div>
         <div class="col col-3">
-          <button class="btn btn-primary" @click="fetchRequests"><i class="fas fa-search"></i> Lọc dữ liệu</button>
+          <button class="btn btn-primary" @click="fetchRequests"><i class="fas fa-search"></i> {{ t('mc.filter') }}</button>
         </div>
       </div>
     </div>
@@ -30,24 +30,24 @@
     <div class="grid-content bg-white flex-1 p-3" style="overflow-y:auto">
       <div v-if="loading" class="text-center py-5">
         <div class="spinner-border text-primary"></div>
-        <p class="mt-2">Đang tải danh sách chờ duyệt...</p>
+        <p class="mt-2">{{ t('mc.loading') }}</p>
       </div>
       <table v-else class="grid-table">
         <thead>
           <tr>
             <th width="40"><input type="checkbox" @change="toggleAll" :checked="isAllSelected"/></th>
-            <th>Mã GD</th>
-            <th>Loại nghiệp vụ</th>
-            <th>Hành động</th>
-            <th>Dữ liệu chi tiết</th>
-            <th>Người tạo</th>
-            <th>Thời gian tạo</th>
-            <th>Trạng thái</th>
+            <th>{{ t('mc.colTransId') }}</th>
+            <th>{{ t('mc.bizType') }}</th>
+            <th>{{ t('mc.action') }}</th>
+            <th>{{ t('mc.detailData') }}</th>
+            <th>{{ t('mc.creator') }}</th>
+            <th>{{ t('mc.createdAt') }}</th>
+            <th>{{ t('col.recordStatus') }}</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="filteredRequests.length === 0">
-            <td colspan="8" class="text-center text-muted py-4">Không có dữ liệu chờ duyệt</td>
+            <td colspan="8" class="text-center text-muted py-4">{{ t('mc.noData') }}</td>
           </tr>
           <tr 
             v-for="req in filteredRequests" 
@@ -78,12 +78,12 @@
     <div v-if="showRejectModal" class="modal-overlay">
       <div class="modal-content" style="max-width: 500px">
         <div class="modal-header">
-          <div class="modal-title text-danger"><i class="fas fa-times-circle"></i> Từ chối yêu cầu</div>
+          <div class="modal-title text-danger"><i class="fas fa-times-circle"></i> {{ t('mc.rejectTitle') }}</div>
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label class="form-label">Lý do từ chối <span class="required">*</span></label>
-            <textarea class="form-control" v-model="rejectReason" rows="3" placeholder="Nhập lý do từ chối..."></textarea>
+            <label class="form-label">{{ t('mc.rejectReason') }} <span class="required">*</span></label>
+            <textarea class="form-control" v-model="rejectReason" rows="3" :placeholder="t('mc.rejectPlaceholder')"></textarea>
             <div v-if="rejectError" class="text-danger small mt-1">{{ rejectError }}</div>
           </div>
         </div>
@@ -105,9 +105,11 @@ import ValidationInput from '@/components/common/ValidationInput.vue'
 import { MakerCheckerService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import { useNotify } from '@/composables/useNotify'
+import { useI18n } from '@/composables/useI18n'
 
 const authStore = useAuthStore()
 const notify = useNotify()
+const { t } = useI18n()
 const requests = ref([])
 const loading = ref(false)
 const filters = ref({ transId: '', type: '' })

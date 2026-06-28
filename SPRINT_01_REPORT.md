@@ -220,9 +220,14 @@ Các quy tắc nghiệp vụ URD mục 3.2, đăng ký DI trong `Program.cs`:
 - `ClientView`: dịch tab, tiêu đề section, **toàn bộ nhãn trường**, header lưới + cấu hình cột, phân trang, tab Liên hệ; **các droplist đổi ngôn ngữ tức thì** (loại hình KH, loại tổ chức, giới tính, kênh mở TK, loại liên hệ/loại thông tin) qua `tc()`; trạng thái bản ghi theo ngôn ngữ.
 - Đổi ngôn ngữ **không reload trang**, ghi nhớ lựa chọn (localStorage) — đúng yêu cầu URD.
 
+### Đã mở rộng (Phase 7.1)
+- **Login / Register / Dashboard / Audit / MakerChecker**: dịch trọn vẹn nhãn, tiêu đề, placeholder, header bảng, modal.
+- **ContactList / UserList / SystemCode**: dịch tiêu đề màn chính.
+- Bổ sung ~70 khóa VN/EN vào `messages.js` (auth, reg, dash, audit, mc, page).
+
 ### Còn lại
-- Áp i18n cho các màn còn lại (Login, Dashboard, User, SystemCode, Audit, MakerChecker) theo cùng pattern.
-- Toolbar buttons (Search/Add/…) hiện vẫn nhãn cố định — có thể map qua `t()` sau.
+- Một vài chuỗi phụ trong các màn lớn (UserList/SystemCode form fields) chưa dịch hết.
+- Toolbar buttons (Search/Add/…) vẫn nhãn cố định — có thể map qua `t()` sau.
 
 ---
 
