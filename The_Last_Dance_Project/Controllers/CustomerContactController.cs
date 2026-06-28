@@ -23,6 +23,14 @@ namespace The_Last_Dance_Project.Controllers
 
         private string GetUserId() => User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "SYSTEM";
 
+        // CBNV (Admin/Maker/Checker) được xem liên hệ của mọi khách hàng; user thường chỉ xem của mình
+        private static bool CanRead(string? role, string? userId, string? ownerId)
+            => role is "Administrator" or "Maker" or "Checker" || userId == ownerId;
+
+        // Admin/Maker được tạo/sửa/xóa liên hệ của khách hàng (qua maker-checker); user thường chỉ của mình
+        private static bool CanWrite(string? role, string? userId, string? ownerId)
+            => role is "Administrator" or "Maker" || userId == ownerId;
+
         [HttpGet]
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetAll()
@@ -40,7 +48,7 @@ namespace The_Last_Dance_Project.Controllers
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
 
-            if (currentUserRole != "Administrator" && currentUserId != contact.CustId)
+            if (!CanRead(currentUserRole, currentUserId, contact.CustId))
             {
                 return Forbid("Bạn không có quyền xem thông tin liên hệ của người khác.");
             }
@@ -54,7 +62,7 @@ namespace The_Last_Dance_Project.Controllers
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
 
-            if (currentUserRole != "Administrator" && currentUserId != custId)
+            if (!CanRead(currentUserRole, currentUserId, custId))
             {
                 return Forbid("Bạn không có quyền xem thông tin liên hệ của người khác.");
             }
@@ -69,7 +77,7 @@ namespace The_Last_Dance_Project.Controllers
             var currentUserId = GetUserId();
             var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
 
-            if (currentUserRole != "Administrator" && currentUserId != dto.CustId)
+            if (!CanWrite(currentUserRole, currentUserId, dto.CustId))
             {
                 return Forbid("Bạn không có quyền thêm liên hệ cho người khác.");
             }
@@ -90,7 +98,7 @@ namespace The_Last_Dance_Project.Controllers
             var currentUserId = GetUserId();
             var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
 
-            if (currentUserRole != "Administrator" && currentUserId != existing.CustId)
+            if (!CanWrite(currentUserRole, currentUserId, existing.CustId))
             {
                 return Forbid("Bạn không có quyền cập nhật liên hệ của người khác.");
             }
@@ -123,7 +131,7 @@ namespace The_Last_Dance_Project.Controllers
             var currentUserId = GetUserId();
             var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
 
-            if (currentUserRole != "Administrator" && currentUserId != existing.CustId)
+            if (!CanWrite(currentUserRole, currentUserId, existing.CustId))
             {
                 return Forbid("Bạn không có quyền xóa liên hệ của người khác.");
             }
@@ -143,7 +151,7 @@ namespace The_Last_Dance_Project.Controllers
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
 
-            if (currentUserRole != "Administrator" && currentUserId != existing.CustId)
+            if (!CanWrite(currentUserRole, currentUserId, existing.CustId))
             {
                 return Forbid("Bạn không có quyền thay đổi thông tin của người khác.");
             }

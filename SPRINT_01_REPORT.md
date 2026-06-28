@@ -179,8 +179,31 @@ Các quy tắc nghiệp vụ URD mục 3.2, đăng ký DI trong `Program.cs`:
 - Điều phối bằng `Promise.allSettled`, báo cáo số thành công/thất bại, tự làm mới danh sách.
 
 ### Còn lại
-- Copy record (tạo nhanh từ bản ghi có sẵn).
 - Bulk gói trong 1 transaction backend (hiện gọi tuần tự nhiều request).
+
+---
+
+## 10. Phase 6 — Tab Liên hệ (CRUD) + Copy record
+
+> Frontend **đã build kiểm chứng** ✅ (ClientView ~34.2kB). Backend: chỉ chỉnh phân quyền controller.
+
+### A. Phân quyền liên hệ (`CustomerContactController`)
+- Trước đây chỉ **Administrator** (hoặc chính chủ) được quản lý liên hệ → **Maker bị Forbid** khi thao tác liên hệ của Client.
+- Thêm helper `CanRead` (Admin/Maker/Checker/chính chủ) và `CanWrite` (Admin/Maker/chính chủ); thay toàn bộ kiểm tra cứng. Ghi vẫn đi qua maker-checker (chờ duyệt).
+
+### B. Tab Liên hệ trong `ClientView`
+- Danh sách liên hệ của Client đang chọn: Loại LH, Loại thông tin, Giá trị, Quốc gia, Mặc định.
+- **Thêm/Sửa/Xóa/Đặt mặc định** inline (Maker/Admin).
+- `InfoType` thay đổi động theo `AddType` (Địa chỉ/SĐT/Email/Fax), trường Fax attention hiện khi loại = Fax.
+- Thêm/sửa/xóa **gửi qua maker-checker** (hiển thị thông báo chờ duyệt); Đặt mặc định áp dụng ngay.
+
+### C. Copy record
+- Nút **Copy** (Maker/Admin): sao chép dữ liệu bản ghi đang chọn sang chế độ thêm mới, xóa Mã KH + các trường tự sinh để tạo bản ghi mới.
+
+### Còn lại cho phân hệ Client
+- Bulk gói trong 1 transaction backend.
+- Tải/hiển thị nhiều ảnh chữ ký; cột giấy tờ định danh (cần migration).
+- i18n VN/EN (Phase tiếp theo theo kế hoạch tổng).
 
 ---
 

@@ -96,17 +96,66 @@
       
       <!-- TAB 2: LIÊN HỆ -->
       <div v-show="currentTab === 'contact'" class="tab-content">
-        <table class="data-table">
-          <thead>
-            <tr><th>Loại LH</th><th>Giá trị</th></tr>
-          </thead>
-          <tbody>
-            <tr v-for="(c, i) in contacts" :key="i">
-              <td>{{ c.contactType }}</td>
-              <td>{{ c.detailInfo }}</td>
-            </tr>
-          </tbody>
-        </table>
+        <div v-if="!formData.custId" class="empty-state">
+          Chọn (hoặc lưu) một khách hàng để quản lý thông tin liên hệ.
+        </div>
+        <template v-else>
+          <div class="contact-header">
+            <span>Danh sách liên hệ ({{ contacts.length }})</span>
+            <button v-if="canManageContacts" class="btn btn-primary btn-sm" @click="openAddContact">+ Thêm liên hệ</button>
+          </div>
+          <p class="contact-note">Lưu ý: thêm/sửa/xóa liên hệ sẽ gửi yêu cầu chờ Checker duyệt.</p>
+
+          <table class="data-table contact-table">
+            <thead>
+              <tr><th>Loại LH</th><th>Loại thông tin</th><th>Giá trị</th><th>Quốc gia</th><th>Mặc định</th><th v-if="canManageContacts">Thao tác</th></tr>
+            </thead>
+            <tbody>
+              <tr v-for="c in contacts" :key="c.contactId">
+                <td>{{ addTypeLabel(c.addType) }}</td>
+                <td>{{ infoTypeLabel(c.addType, c.infoType) }}</td>
+                <td>{{ c.contact }}</td>
+                <td>{{ c.countryId || '—' }}</td>
+                <td>{{ c.isDefault === 'Y' ? '✓' : '' }}</td>
+                <td v-if="canManageContacts" class="actions-cell">
+                  <button class="btn btn-ghost btn-sm" title="Sửa" @click="openEditContact(c)">✏️</button>
+                  <button class="btn btn-ghost btn-sm" title="Đặt mặc định" :disabled="c.isDefault === 'Y'" @click="setDefaultContact(c)">⭐</button>
+                  <button class="btn btn-ghost btn-sm" title="Xóa" @click="deleteContact(c)">🗑️</button>
+                </td>
+              </tr>
+              <tr v-if="contacts.length === 0">
+                <td :colspan="canManageContacts ? 6 : 5" class="empty-state">Chưa có thông tin liên hệ</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Form thêm/sửa liên hệ -->
+          <fieldset v-if="showContactForm" class="form-section contact-form">
+            <legend class="form-section-title">{{ contactEditing ? 'Sửa liên hệ' : 'Thêm liên hệ' }}</legend>
+            <div class="form-grid">
+              <ValidationInput class="fld" label="Loại liên hệ" required>
+                <select v-model="contactForm.addType" class="form-control" @change="onAddTypeChange">
+                  <option v-for="o in addTypeOptions" :key="o.id" :value="o.id">{{ o.vi }}</option>
+                </select>
+              </ValidationInput>
+              <ValidationInput class="fld" label="Loại thông tin" required>
+                <select v-model="contactForm.infoType" class="form-control">
+                  <option v-for="o in contactInfoOptions" :key="o.id" :value="o.id">{{ o.vi }}</option>
+                </select>
+              </ValidationInput>
+              <ValidationInput class="fld" label="Giá trị" required v-model="contactForm.contact" :error="contactError" />
+              <ValidationInput class="fld" label="Quốc gia" v-model="contactForm.countryId" />
+              <ValidationInput v-if="contactForm.addType === 'F'" class="fld" label="Fax attention" v-model="contactForm.faxAttention" />
+              <div class="fld checkbox-fld">
+                <label><input type="checkbox" :checked="contactForm.isDefault === 'Y'" @change="contactForm.isDefault = $event.target.checked ? 'Y' : 'N'" /> Mặc định</label>
+              </div>
+            </div>
+            <div class="contact-form-actions">
+              <button class="btn btn-outline btn-sm" @click="showContactForm = false">Hủy</button>
+              <button class="btn btn-primary btn-sm" @click="saveContact">Lưu</button>
+            </div>
+          </fieldset>
+        </template>
       </div>
       
       </div>
@@ -335,6 +384,84 @@ async function loadContactsFor(custId) {
   }
 }
 
+// ===== Tab Liên hệ: danh mục & CRUD =====
+const addTypeOptions = [
+  { id: 'A', vi: 'Địa chỉ' },
+  { id: 'S', vi: 'Số điện thoại' },
+  { id: 'E', vi: 'Email' },
+  { id: 'F', vi: 'Fax' }
+]
+const infoTypeByAddType = {
+  A: [{ id: 'PER', vi: 'Thường trú/Trụ sở' }, { id: 'CON', vi: 'Liên lạc' }, { id: 'BIL', vi: 'Hóa đơn' }],
+  S: [{ id: 'HOM', vi: 'Số nhà' }, { id: 'OFC', vi: 'Công ty' }, { id: 'MOB', vi: 'Di động' }],
+  E: [{ id: 'EML', vi: 'Email' }],
+  F: [{ id: 'FAX', vi: 'Fax' }]
+}
+const addTypeLabel = (t) => (addTypeOptions.find(o => o.id === t) || {}).vi || t || '—'
+const infoTypeLabel = (addType, infoType) => {
+  const list = infoTypeByAddType[addType] || []
+  return (list.find(o => o.id === infoType) || {}).vi || infoType || '—'
+}
+const canManageContacts = computed(() => authStore.isMaker || authStore.isAdmin)
+
+const showContactForm = ref(false)
+const contactEditing = ref(false)
+const contactError = ref('')
+const contactForm = ref({ contactId: '', custId: '', addType: 'A', infoType: 'PER', contact: '', countryId: 'VN', faxAttention: '', isDefault: 'N', description: '' })
+const contactInfoOptions = computed(() => infoTypeByAddType[contactForm.value.addType] || [])
+
+const onAddTypeChange = () => {
+  const opts = infoTypeByAddType[contactForm.value.addType] || []
+  contactForm.value.infoType = opts.length ? opts[0].id : ''
+}
+const openAddContact = () => {
+  contactForm.value = { contactId: '', custId: formData.value.custId, addType: 'A', infoType: 'PER', contact: '', countryId: 'VN', faxAttention: '', isDefault: 'N', description: '' }
+  contactError.value = ''
+  contactEditing.value = false
+  showContactForm.value = true
+}
+const openEditContact = (c) => {
+  contactForm.value = { ...c }
+  contactError.value = ''
+  contactEditing.value = true
+  showContactForm.value = true
+}
+const saveContact = async () => {
+  if (!contactForm.value.contact?.trim()) { contactError.value = 'Bắt buộc nhập'; return }
+  try {
+    if (contactEditing.value) {
+      await contactStore.update(contactForm.value.contactId, contactForm.value)
+    } else {
+      const payload = { ...contactForm.value, contactId: `C${formData.value.custId}-${Date.now()}`.slice(0, 50) }
+      await contactStore.create(payload)
+    }
+    notify.success('Đã gửi yêu cầu liên hệ (chờ duyệt)')
+    showContactForm.value = false
+    await loadContactsFor(formData.value.custId)
+  } catch (e) {
+    notify.error(e.response?.data?.message || e.response?.data || 'Lưu liên hệ thất bại')
+  }
+}
+const deleteContact = async (c) => {
+  if (!confirm('Gửi yêu cầu xóa liên hệ này?')) return
+  try {
+    await contactStore.delete(c.contactId)
+    notify.success('Đã gửi yêu cầu xóa (chờ duyệt)')
+    await loadContactsFor(formData.value.custId)
+  } catch (e) {
+    notify.error('Xóa liên hệ thất bại')
+  }
+}
+const setDefaultContact = async (c) => {
+  try {
+    await contactStore.setDefault(c.contactId)
+    notify.success('Đã đặt liên hệ mặc định')
+    await loadContactsFor(formData.value.custId)
+  } catch (e) {
+    notify.error('Đặt mặc định thất bại')
+  }
+}
+
 // Tự sinh ClientID qua API (icon #)
 const generateClientId = async () => {
   try {
@@ -435,10 +562,37 @@ const handleToolbarAction = async (action) => {
     await requestDeleteClient()
   } else if (action === 'audit') {
     await openAudit()
+  } else if (action === 'copy') {
+    copyClient()
   } else {
-    // Copy: sẽ hoàn thiện ở giai đoạn tiếp theo
     notify.info(`Chức năng "${action}" đang được phát triển`)
   }
+}
+
+// Copy record: sao chép dữ liệu bản ghi hiện tại sang chế độ thêm mới (URD)
+const copyClient = () => {
+  if (!formData.value.custId && !formData.value.clientId) {
+    notify.warn('Vui lòng chọn một bản ghi để sao chép')
+    return
+  }
+  const src = { ...formData.value }
+  // Xóa các trường định danh/tự sinh để tạo bản ghi mới
+  delete src.custId
+  delete src.recordStatus
+  delete src.custodyCd
+  delete src.fatca
+  delete src.createdDate
+  delete src.createdBy
+  delete src.createdDateDisplay
+  delete src.approveBy
+  delete src.approveDate
+  src.clientId = ''
+  formData.value = src
+  selectedIds.value = []
+  contacts.value = []
+  currentTab.value = 'general'
+  mode.value = 'add'
+  notify.info('Đã sao chép dữ liệu. Nhập Mã KH mới rồi bấm Lưu.')
 }
 
 // Lấy ID bản ghi đang chọn
@@ -755,4 +909,19 @@ const handleFileUpload = async (event) => {
 .btn-danger { background: #ef4444; color: #fff; border: 1px solid #ef4444; }
 .btn-primary { background: #2563eb; color: #fff; border: 1px solid #2563eb; }
 .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+/* Tab Liên hệ */
+.contact-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.contact-note { font-size: 12px; color: #6b7280; margin: 0 0 10px; }
+.contact-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.contact-table th, .contact-table td { border: 1px solid #e5e7eb; padding: 6px 8px; text-align: left; }
+.contact-table thead th { background: #f9fafb; }
+.actions-cell { display: flex; gap: 4px; }
+.contact-form { margin-top: 12px; }
+.contact-form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
 </style>
