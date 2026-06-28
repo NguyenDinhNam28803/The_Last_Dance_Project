@@ -112,6 +112,29 @@ Các quy tắc nghiệp vụ URD mục 3.2, đăng ký DI trong `Program.cs`:
 
 ---
 
+## 7. Phase 3 — Giao diện chung: tìm kiếm wildcard, phân trang, cấu hình cột, toolbar động
+
+> Toàn bộ là frontend — **đã build kiểm chứng** ✅ (Vite). Không có thay đổi backend.
+
+- **`utils/wildcard.js`** — tìm kiếm theo URD: `MIN*`, `*MIN`, `*MIN*`, khớp chính xác (không phân biệt hoa/thường).
+- **`composables/useDataGrid.js`** — lưới dùng chung, tái sử dụng được cho mọi màn hình:
+  - Tìm kiếm wildcard nhiều trường.
+  - **Phân trang 10/20/50/100** + điều hướng trang.
+  - **Cấu hình cột** (hiện/ẩn + đổi thứ tự ↑↓), **lưu localStorage theo từng user**, nút "Mặc định".
+- **`ClientView.vue`** tích hợp:
+  - Ô tìm kiếm + Clear + chọn số dòng/trang + nút ⚙ Cột (popup cấu hình).
+  - Lưới render cột động theo cấu hình; badge trạng thái; trạng thái rỗng.
+  - Thanh phân trang.
+  - **Toolbar động theo vai trò** (URD Maker vs Checker): Maker/Admin có Add/Edit/Copy/Delete/Import; Checker/Admin có Approve/Reject; chung Search/Refresh/Audit/Export/Template.
+  - Handler bổ sung: Refresh (làm mới), Cancel, Edit; các chức năng chưa hoàn thiện (Approve/Reject/Delete/Copy/Audit) hiển thị thông báo "đang phát triển".
+
+### Còn lại cho Phase 3 (sprint sau)
+- Nối Approve/Reject/Delete/Copy/Audit của Client vào API Maker–Checker thực tế.
+- Tìm kiếm nhiều tiêu chí riêng từng trường + chọn nhiều bản ghi (bulk).
+- Kéo-thả đổi thứ tự cột (hiện dùng nút ↑↓).
+
+---
+
 ## 5. Tự đánh giá rủi ro
 
 | Thay đổi | Rủi ro | Ghi chú |

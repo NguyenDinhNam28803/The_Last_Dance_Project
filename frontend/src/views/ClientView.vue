@@ -60,27 +60,70 @@
     <!-- RIGHT PANEL: GRID -->
     <div class="grid-panel" :class="{ collapsed: isGridCollapsed }">
       <div class="grid-panel-header">
-        <span>K.Quả ({{ clientStore.clients.length }})</span>
+        <span>K.Quả ({{ grid.totalItems.value }})</span>
         <button class="btn btn-outline" @click="isGridCollapsed = !isGridCollapsed">Thu gọn</button>
       </div>
-      
+
+      <!-- Thanh tìm kiếm + công cụ lưới -->
+      <div class="grid-toolbar">
+        <input
+          v-model="grid.searchTerm.value"
+          class="grid-search"
+          placeholder="Tìm kiếm (MIN*, *MIN, *MIN*, chính xác)"
+        />
+        <button class="btn btn-outline" title="Xóa tìm kiếm" @click="grid.clearSearch()">Clear</button>
+        <select v-model.number="grid.pageSize.value" class="grid-pagesize">
+          <option v-for="s in grid.PAGE_SIZES" :key="s" :value="s">{{ s }}/trang</option>
+        </select>
+        <button class="btn btn-outline" title="Cấu hình cột" @click="showColumnConfig = !showColumnConfig">⚙ Cột</button>
+      </div>
+
+      <!-- Popup cấu hình cột -->
+      <div v-if="showColumnConfig" class="column-config">
+        <div v-for="col in grid.columns.value" :key="col.key" class="column-config-row">
+          <label>
+            <input type="checkbox" :checked="col.visible" @change="grid.toggleColumn(col.key)" />
+            {{ col.label }}
+          </label>
+          <span class="column-config-actions">
+            <button class="btn btn-ghost btn-sm" @click="grid.moveColumn(col.key, 'up')">↑</button>
+            <button class="btn btn-ghost btn-sm" @click="grid.moveColumn(col.key, 'down')">↓</button>
+          </span>
+        </div>
+        <div class="column-config-footer">
+          <button class="btn btn-outline" @click="grid.resetColumns()">Mặc định</button>
+          <button class="btn btn-primary" @click="showColumnConfig = false">Đóng</button>
+        </div>
+      </div>
+
       <div class="grid-content">
         <table class="grid-table">
           <thead>
-            <tr><th>Mã KH</th><th>Tên khách hàng</th><th>Trạng thái</th></tr>
+            <tr>
+              <th v-for="col in grid.visibleColumns.value" :key="col.key">{{ col.label }}</th>
+            </tr>
           </thead>
           <tbody>
-            <tr v-for="cli in clientStore.clients" :key="cli.custId || cli.clientId" @click="selectClient(cli)">
-              <td class="font-weight-bold">{{ cli.custId || cli.clientId }}</td>
-              <td>{{ cli.name }}</td>
-              <td>
-                <span class="badge" :class="recordStatusBadge(cli.recordStatus)">
+            <tr v-for="cli in grid.paged.value" :key="cli.custId || cli.clientId" @click="selectClient(cli)">
+              <td v-for="col in grid.visibleColumns.value" :key="col.key" :class="{ 'font-weight-bold': col.key === 'custId' }">
+                <span v-if="col.key === 'recordStatus'" class="badge" :class="recordStatusBadge(cli.recordStatus)">
                   {{ recordStatusLabel(cli.recordStatus) }}
                 </span>
+                <span v-else>{{ cellValue(cli, col.key) }}</span>
               </td>
+            </tr>
+            <tr v-if="grid.paged.value.length === 0">
+              <td :colspan="grid.visibleColumns.value.length" class="empty-state">Không tìm thấy bản ghi nào</td>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Phân trang -->
+      <div class="grid-pagination">
+        <button class="btn btn-outline btn-sm" :disabled="grid.currentPage.value <= 1" @click="grid.goToPage(grid.currentPage.value - 1)">‹</button>
+        <span>Trang {{ grid.currentPage.value }} / {{ grid.totalPages.value }}</span>
+        <button class="btn btn-outline btn-sm" :disabled="grid.currentPage.value >= grid.totalPages.value" @click="grid.goToPage(grid.currentPage.value + 1)">›</button>
       </div>
     </div>
   </div>
@@ -96,6 +139,7 @@ import { useCustomerContactStore } from '@/stores/customerContact'
 import { useNotify } from '@/composables/useNotify'
 import { ImportExportService, ClientService } from '@/services/api'
 import { recordStatusLabel, recordStatusBadge } from '@/constants/recordStatus'
+import { useDataGrid } from '@/composables/useDataGrid'
 
 const clientStore = useClientStore()
 const authStore = useAuthStore()
@@ -112,6 +156,29 @@ const selectedIds = ref([])
 const formData = ref({})
 const errors = ref({})
 const fileInput = ref(null)
+const showColumnConfig = ref(false)
+
+// Lưới Kết quả tìm kiếm: wildcard + phân trang + cấu hình cột (lưu theo user)
+const clientColumns = [
+  { key: 'custId', label: 'Mã KH' },
+  { key: 'name', label: 'Tên khách hàng' },
+  { key: 'registrationType', label: 'Loại hình' },
+  { key: 'nationality', label: 'Quốc tịch' },
+  { key: 'recordStatus', label: 'Trạng thái' }
+]
+const grid = useDataGrid({
+  source: computed(() => clientStore.clients),
+  columns: clientColumns,
+  storageKey: 'grid.client',
+  userId: authStore.user?.id || 'anon'
+})
+
+// Lấy giá trị ô hiển thị (xử lý riêng Mã KH dùng custId hoặc clientId)
+const cellValue = (cli, key) => {
+  if (key === 'custId') return cli.custId || cli.clientId || ''
+  const v = cli[key]
+  return (v === null || v === undefined || v === '') ? '—' : v
+}
 
 onMounted(() => clientStore.fetchAll())
 
@@ -169,12 +236,16 @@ const validate = () => {
   return Object.keys(e).length === 0
 }
 
+// Toolbar động theo vai trò (URD: Maker vs Checker)
 const toolbarFeatures = computed(() => {
   if (mode.value === 'add' || mode.value === 'edit') return ['Save', 'Cancel']
-  
-  const base = ['Search', 'Template', 'Export']
+
+  const base = ['Search', 'Refresh', 'Audit', 'Template', 'Export']
   if (authStore.isMaker || authStore.isAdmin) {
-    base.push('Add', 'Edit', 'Delete', 'Import')
+    base.push('Add', 'Edit', 'Copy', 'Delete', 'Import')
+  }
+  if (authStore.isChecker || authStore.isAdmin) {
+    base.push('Approve', 'Reject')
   }
   return base
 })
@@ -198,6 +269,20 @@ const handleToolbarAction = async (action) => {
     fileInput.value.click()
   } else if (action === 'template') {
     await downloadTemplate()
+  } else if (action === 'refresh') {
+    await clientStore.fetchAll()
+    notify.info('Đã làm mới danh sách')
+  } else if (action === 'cancel') {
+    mode.value = 'view'
+    errors.value = {}
+  } else if (action === 'edit') {
+    if (!selectedIds.value.length) { notify.warn('Vui lòng chọn một bản ghi'); return }
+    mode.value = 'edit'
+  } else if (action === 'search') {
+    notify.info('Nhập tiêu chí vào ô tìm kiếm phía trên lưới (hỗ trợ *)')
+  } else {
+    // Approve/Reject/Delete/Copy/Audit: sẽ hoàn thiện ở giai đoạn tiếp theo
+    notify.info(`Chức năng "${action}" đang được phát triển`)
   }
 }
 
@@ -259,3 +344,82 @@ const handleFileUpload = async (event) => {
   }
 }
 </script>
+
+<style scoped>
+.grid-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+.grid-search {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 4px;
+  font-size: 13px;
+}
+.grid-pagesize {
+  padding: 6px 8px;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 4px;
+  font-size: 13px;
+}
+.column-config {
+  position: absolute;
+  right: 12px;
+  z-index: 20;
+  background: #fff;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  padding: 10px;
+  min-width: 220px;
+}
+.column-config-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 2px;
+  font-size: 13px;
+}
+.column-config-actions {
+  display: flex;
+  gap: 2px;
+}
+.column-config-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 8px;
+  border-top: 1px solid var(--color-border, #eee);
+  padding-top: 8px;
+}
+.grid-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px;
+  font-size: 13px;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+}
+.empty-state {
+  text-align: center;
+  color: #9ca3af;
+  padding: 16px;
+}
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  background: #e5e7eb;
+  color: #374151;
+}
+.badge-success { background: #d1fae5; color: #065f46; }
+.badge-warning { background: #fef3c7; color: #92400e; }
+.badge-danger { background: #fee2e2; color: #991b1b; }
+.badge-default { background: #e5e7eb; color: #374151; }
+</style>
