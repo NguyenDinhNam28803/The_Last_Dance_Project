@@ -123,6 +123,69 @@ namespace The_Last_Dance_Project.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        // CHECKER: Duyệt bản ghi Client
+        [HttpPost("Client/{id}/approve")]
+        [Authorize(Roles = "Administrator,Checker")]
+        public async Task<IActionResult> ApproveClient(string id)
+        {
+            var checkerId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "SYSTEM";
+            try
+            {
+                var ok = await _userService.ApproveClientAsync(id, checkerId);
+                if (!ok) return NotFound(new { message = "Không tìm thấy khách hàng." });
+                return Ok(new { message = "Đã duyệt thành công." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // CHECKER: Từ chối bản ghi Client (kèm lý do)
+        [HttpPost("Client/{id}/reject")]
+        [Authorize(Roles = "Administrator,Checker")]
+        public async Task<IActionResult> RejectClient(string id, [FromBody] ClientRejectDto dto)
+        {
+            var checkerId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "SYSTEM";
+            try
+            {
+                var ok = await _userService.RejectClientAsync(id, checkerId, dto.Reason);
+                if (!ok) return NotFound(new { message = "Không tìm thấy khách hàng." });
+                return Ok(new { message = "Đã từ chối." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // MAKER: Yêu cầu xóa bản ghi Client (Active -> Chờ duyệt xóa)
+        [HttpPost("Client/{id}/delete-request")]
+        [Authorize(Roles = "Administrator,Maker")]
+        public async Task<IActionResult> RequestDeleteClient(string id)
+        {
+            var makerId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "SYSTEM";
+            try
+            {
+                var ok = await _userService.RequestDeleteClientAsync(id, makerId);
+                if (!ok) return NotFound(new { message = "Không tìm thấy khách hàng." });
+                return Ok(new { message = "Đã gửi yêu cầu xóa (chờ duyệt)." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // Audit trail của 1 bản ghi Client
+        [HttpGet("Client/{id}/audit")]
+        [Authorize(Roles = "Administrator,Maker,Checker")]
+        public async Task<IActionResult> GetClientAudit(string id)
+        {
+            var history = await _userService.GetClientAuditAsync(id);
+            return Ok(history);
+        }
     }
 }
 

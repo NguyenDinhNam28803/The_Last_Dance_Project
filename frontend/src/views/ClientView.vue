@@ -126,6 +126,36 @@
         <button class="btn btn-outline btn-sm" :disabled="grid.currentPage.value >= grid.totalPages.value" @click="grid.goToPage(grid.currentPage.value + 1)">›</button>
       </div>
     </div>
+
+    <!-- Popup Audit trail -->
+    <div v-if="showAuditModal" class="modal-overlay" @click.self="showAuditModal = false">
+      <div class="modal-container audit-modal">
+        <div class="modal-header">
+          <h3>🕓 Lịch sử thay đổi (Audit trail)</h3>
+          <button class="modal-close" @click="showAuditModal = false">✕</button>
+        </div>
+        <div class="modal-body">
+          <table class="data-table audit-table">
+            <thead>
+              <tr><th>Thời gian</th><th>Hành động</th><th>Trạng thái</th><th>Maker</th><th>Checker</th><th>Mô tả</th></tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in auditRows" :key="row.mtTranId">
+                <td>{{ formatAuditDate(row.actionDate) }}</td>
+                <td>{{ auditTypeLabel(row.mtlType) }}</td>
+                <td>{{ auditStatusLabel(row.mtlStatus) }}</td>
+                <td>{{ row.maker || '—' }}</td>
+                <td>{{ row.checker || '—' }}</td>
+                <td>{{ row.description || '—' }}</td>
+              </tr>
+              <tr v-if="auditRows.length === 0">
+                <td colspan="6" class="empty-state">Chưa có lịch sử thay đổi</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -280,9 +310,78 @@ const handleToolbarAction = async (action) => {
     mode.value = 'edit'
   } else if (action === 'search') {
     notify.info('Nhập tiêu chí vào ô tìm kiếm phía trên lưới (hỗ trợ *)')
+  } else if (action === 'approve') {
+    await approveClient()
+  } else if (action === 'reject') {
+    await rejectClient()
+  } else if (action === 'delete') {
+    await requestDeleteClient()
+  } else if (action === 'audit') {
+    await openAudit()
   } else {
-    // Approve/Reject/Delete/Copy/Audit: sẽ hoàn thiện ở giai đoạn tiếp theo
+    // Copy: sẽ hoàn thiện ở giai đoạn tiếp theo
     notify.info(`Chức năng "${action}" đang được phát triển`)
+  }
+}
+
+// Lấy ID bản ghi đang chọn
+const currentClientId = () => formData.value.custId || formData.value.clientId || selectedIds.value[0]
+
+const approveClient = async () => {
+  const id = currentClientId()
+  if (!id) { notify.warn('Vui lòng chọn một bản ghi'); return }
+  if (!confirm('Xác nhận DUYỆT bản ghi này?')) return
+  try {
+    await ClientService.approve(id)
+    notify.success('Đã duyệt thành công')
+    await clientStore.fetchAll()
+  } catch (e) {
+    notify.error(e.response?.data?.message || 'Duyệt thất bại')
+  }
+}
+
+const rejectClient = async () => {
+  const id = currentClientId()
+  if (!id) { notify.warn('Vui lòng chọn một bản ghi'); return }
+  const reason = prompt('Nhập lý do từ chối (bắt buộc):')
+  if (reason === null) return
+  if (!reason.trim()) { notify.warn('Lý do từ chối là bắt buộc'); return }
+  try {
+    await ClientService.reject(id, reason.trim())
+    notify.success('Đã từ chối bản ghi')
+    await clientStore.fetchAll()
+  } catch (e) {
+    notify.error(e.response?.data?.message || 'Từ chối thất bại')
+  }
+}
+
+const requestDeleteClient = async () => {
+  const id = currentClientId()
+  if (!id) { notify.warn('Vui lòng chọn một bản ghi'); return }
+  if (!confirm('Gửi yêu cầu XÓA bản ghi đã duyệt này?')) return
+  try {
+    await ClientService.requestDelete(id)
+    notify.success('Đã gửi yêu cầu xóa (chờ duyệt)')
+    await clientStore.fetchAll()
+  } catch (e) {
+    notify.error(e.response?.data?.message || 'Yêu cầu xóa thất bại')
+  }
+}
+
+const auditRows = ref([])
+const showAuditModal = ref(false)
+const formatAuditDate = (iso) => iso ? new Date(iso).toLocaleString('vi-VN') : '—'
+const auditTypeLabel = (t) => ({ I: 'Thêm', U: 'Sửa', D: 'Xóa' }[t] || t || '—')
+const auditStatusLabel = (s) => ({ N: 'Chờ duyệt', A: 'Đã duyệt', R: 'Từ chối', C: 'Đã hủy' }[s] || s || '—')
+const openAudit = async () => {
+  const id = currentClientId()
+  if (!id) { notify.warn('Vui lòng chọn một bản ghi'); return }
+  try {
+    const res = await ClientService.getAudit(id)
+    auditRows.value = res.data || []
+    showAuditModal.value = true
+  } catch (e) {
+    notify.error('Không tải được lịch sử thay đổi')
   }
 }
 
@@ -422,4 +521,51 @@ const handleFileUpload = async (event) => {
 .badge-warning { background: #fef3c7; color: #92400e; }
 .badge-danger { background: #fee2e2; color: #991b1b; }
 .badge-default { background: #e5e7eb; color: #374151; }
+
+/* Modal Audit trail */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-container {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  width: min(900px, 92vw);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.modal-header h3 { margin: 0; font-size: 16px; }
+.modal-close {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+  color: #6b7280;
+}
+.modal-body { padding: 12px 16px; overflow: auto; }
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.audit-table th, .audit-table td {
+  border: 1px solid #e5e7eb;
+  padding: 6px 8px;
+  text-align: left;
+}
+.audit-table thead th { background: #f9fafb; }
 </style>

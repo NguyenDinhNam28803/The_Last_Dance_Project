@@ -129,9 +129,33 @@ Các quy tắc nghiệp vụ URD mục 3.2, đăng ký DI trong `Program.cs`:
   - Handler bổ sung: Refresh (làm mới), Cancel, Edit; các chức năng chưa hoàn thiện (Approve/Reject/Delete/Copy/Audit) hiển thị thông báo "đang phát triển".
 
 ### Còn lại cho Phase 3 (sprint sau)
-- Nối Approve/Reject/Delete/Copy/Audit của Client vào API Maker–Checker thực tế.
 - Tìm kiếm nhiều tiêu chí riêng từng trường + chọn nhiều bản ghi (bulk).
 - Kéo-thả đổi thứ tự cột (hiện dùng nút ↑↓).
+
+---
+
+## 8. Phase 4 — Hoàn thiện Maker–Checker cho bản ghi Client
+
+> Frontend **đã build kiểm chứng** ✅. Backend viết theo pattern hiện có, **cần `dotnet build`** xác nhận.
+
+**Backend (`CustomerService` + `ICustomerService` + `UserController`):**
+- `ApproveClientAsync` — Chờ duyệt thêm/sửa → **Active** (đặt OpenDate khi duyệt thêm); Chờ duyệt xóa → **Deleted** (Closed + CloseDate). Quy tắc **4 mắt** (không tự duyệt bản ghi mình tạo/sửa).
+- `RejectClientAsync` — **bắt buộc lý do**, → Rejected (lưu RejectDes).
+- `RequestDeleteClientAsync` — Active → **PendingDelete**.
+- `GetClientAuditAsync` — đọc lịch sử từ MTTRAN theo từng Client.
+- **Audit append-only**: mỗi sự kiện (tạo/duyệt/từ chối/yêu cầu xóa) ghi 1 dòng MTTRAN.
+- **Endpoints**: `POST /User/Client/{id}/approve`, `/reject`, `/delete-request`; `GET /User/Client/{id}/audit`.
+
+**Sửa lỗi tiềm ẩn:** `MtlType` (cột `nvarchar(3)`) trước đây bị gán chuỗi dài ("CREATE"…) → lỗi truncation. Đã đổi `TransactionType` sang mã ngắn **I/U/D**.
+
+**Frontend (`ClientView`):**
+- Handler thực cho **Approve / Reject / Delete** (gọi API, làm mới danh sách, xác nhận + nhập lý do từ chối).
+- **Popup Audit trail** hiển thị lịch sử thay đổi (thời gian, hành động, trạng thái, maker, checker, mô tả) với nhãn tiếng Việt.
+
+### Còn lại
+- Luồng Edit Active → PendingUpdate (cần màn sửa Client hoàn chỉnh).
+- Duyệt/Từ chối/Hủy hàng loạt (bulk) trên grid.
+- Chức năng Copy record.
 
 ---
 

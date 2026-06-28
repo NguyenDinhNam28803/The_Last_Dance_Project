@@ -13,14 +13,15 @@ namespace The_Last_Dance_Project.Constants
 
     /// <summary>
     /// Loại hành động của giao dịch Maker-Checker lưu tại MTTRAN.MtlType.
+    /// Lưu ý: cột MTLTYPE giới hạn 3 ký tự nên dùng mã ngắn I/U/D.
     /// </summary>
     public static class TransactionType
     {
-        public const string Insert = "INSERT";
-        public const string Update = "UPDATE";
-        public const string Delete = "DELETE";
+        public const string Insert = "I";
+        public const string Update = "U";
+        public const string Delete = "D";
 
-        /// <summary>Chuẩn hóa action đầu vào (CREATE/ADD/NEW -> INSERT, ...).</summary>
+        /// <summary>Chuẩn hóa action đầu vào (CREATE/ADD/NEW -> I, ...).</summary>
         public static string Normalize(string? action)
         {
             var a = (action ?? string.Empty).Trim().ToUpperInvariant();
@@ -29,7 +30,7 @@ namespace The_Last_Dance_Project.Constants
                 "CREATE" or "ADD" or "NEW" or "INSERT" or "I" => Insert,
                 "UPDATE" or "EDIT" or "MODIFY" or "U" => Update,
                 "DELETE" or "REMOVE" or "DEL" or "D" => Delete,
-                _ => a
+                _ => a.Length > 3 ? a.Substring(0, 3) : a
             };
         }
     }

@@ -26,5 +26,11 @@ namespace The_Last_Dance_Project.Interfaces
         // Client (Khách hàng chứng khoán) - phân hệ theo URD
         Task<string> GenerateNextClientIdAsync();
         Task<UserResponseDto> CreateClientAsync(ClientCreateDto dto, string makerId);
+
+        // Maker-Checker trên bản ghi Client
+        Task<bool> ApproveClientAsync(string id, string checkerId);
+        Task<bool> RejectClientAsync(string id, string checkerId, string reason);
+        Task<bool> RequestDeleteClientAsync(string id, string makerId);
+        Task<IEnumerable<Models.AuditEntity>> GetClientAuditAsync(string id);
     }
 }

@@ -248,7 +248,140 @@ namespace The_Last_Dance_Project.Services
             _db.Customers.Add(client);
             await _db.SaveChangesAsync();
 
+            // Ghi audit log (MTTRAN) cho sự kiện tạo
+            await LogClientAuditAsync(clientId, TransactionType.Insert, TransactionStatus.Pending,
+                maker: makerId, checker: null, description: "Tạo mới khách hàng (chờ duyệt)");
+            await _db.SaveChangesAsync();
+
             return await GetByIdAsync(clientId) ?? MapToResponseDto(client);
+        }
+
+        // CHECKER: Duyệt bản ghi Client (Chờ duyệt thêm/sửa -> Đã duyệt; Chờ duyệt xóa -> Đã xóa)
+        public async Task<bool> ApproveClientAsync(string id, string checkerId)
+        {
+            var client = await _db.Customers.FindAsync(id);
+            if (client == null) return false;
+
+            var status = client.RecordStatus;
+            var isPending = status == RecordStatus.PendingInsert
+                            || status == RecordStatus.PendingUpdate
+                            || status == RecordStatus.PendingDelete;
+            if (!isPending)
+                throw new InvalidOperationException("Bản ghi không ở trạng thái chờ duyệt.");
+
+            // Quy tắc 4 mắt: không được tự duyệt bản ghi do chính mình tạo/sửa
+            var maker = client.LastChangeBy ?? client.CreatedBy;
+            if (!string.IsNullOrEmpty(maker) && maker == checkerId)
+                throw new InvalidOperationException("Không được duyệt bản ghi do chính mình tạo/sửa.");
+
+            string appliedType;
+            if (status == RecordStatus.PendingDelete)
+            {
+                client.RecordStatus = RecordStatus.Deleted;
+                client.Status = "Closed";
+                client.CloseDate = DateTime.UtcNow.ToString("yyyy-MM-dd");
+                appliedType = TransactionType.Delete;
+            }
+            else
+            {
+                if (status == RecordStatus.PendingInsert)
+                    client.OpenDate = DateTime.UtcNow.ToString("yyyy-MM-dd"); // URD: ngày mở = ngày duyệt thành công
+                client.RecordStatus = RecordStatus.Active;
+                client.Status = "Active";
+                appliedType = status == RecordStatus.PendingInsert ? TransactionType.Insert : TransactionType.Update;
+            }
+
+            client.ApproveBy = checkerId;
+            client.ApproveDate = DateTime.UtcNow;
+
+            await LogClientAuditAsync(id, appliedType, TransactionStatus.Approved,
+                maker: maker, checker: checkerId, description: "Duyệt bản ghi khách hàng");
+
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+        // CHECKER: Từ chối bản ghi Client (bắt buộc lý do)
+        public async Task<bool> RejectClientAsync(string id, string checkerId, string reason)
+        {
+            if (string.IsNullOrWhiteSpace(reason))
+                throw new InvalidOperationException("Lý do từ chối là bắt buộc.");
+
+            var client = await _db.Customers.FindAsync(id);
+            if (client == null) return false;
+
+            var status = client.RecordStatus;
+            var isPending = status == RecordStatus.PendingInsert
+                            || status == RecordStatus.PendingUpdate
+                            || status == RecordStatus.PendingDelete;
+            if (!isPending)
+                throw new InvalidOperationException("Bản ghi không ở trạng thái chờ duyệt.");
+
+            var maker = client.LastChangeBy ?? client.CreatedBy;
+            if (!string.IsNullOrEmpty(maker) && maker == checkerId)
+                throw new InvalidOperationException("Không được từ chối bản ghi do chính mình tạo/sửa.");
+
+            client.RecordStatus = RecordStatus.Rejected;
+            client.RejectDes = reason;
+            client.ApproveBy = checkerId;
+            client.ApproveDate = DateTime.UtcNow;
+
+            await LogClientAuditAsync(id, TransactionType.Update, TransactionStatus.Rejected,
+                maker: maker, checker: checkerId, description: reason);
+
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+        // MAKER: Yêu cầu xóa bản ghi Client đã duyệt (Active -> Chờ duyệt xóa)
+        public async Task<bool> RequestDeleteClientAsync(string id, string makerId)
+        {
+            var client = await _db.Customers.FindAsync(id);
+            if (client == null) return false;
+
+            if (client.RecordStatus != RecordStatus.Active)
+                throw new InvalidOperationException("Chỉ được xóa bản ghi đã duyệt (Active).");
+
+            client.RecordStatus = RecordStatus.PendingDelete;
+            client.LastChangeBy = makerId;
+            client.LastChangeDate = DateTime.UtcNow;
+
+            await LogClientAuditAsync(id, TransactionType.Delete, TransactionStatus.Pending,
+                maker: makerId, checker: null, description: "Yêu cầu xóa khách hàng (chờ duyệt)");
+
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+        // Lấy lịch sử thay đổi (Audit trail) của 1 bản ghi Client từ MTTRAN
+        public async Task<IEnumerable<Models.AuditEntity>> GetClientAuditAsync(string id)
+        {
+            return await _db.AuditEntities
+                .Where(a => a.ObjChange == "Customer" && a.KeyValue == id)
+                .OrderByDescending(a => a.ActionDate)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        // Helper: ghi 1 dòng MTTRAN cho mỗi sự kiện lifecycle (audit append-only)
+        private async Task LogClientAuditAsync(string clientId, string actionType, string status,
+            string? maker, string? checker, string? description)
+        {
+            _db.AuditEntities.Add(new Models.AuditEntity
+            {
+                ObjChange = "Customer",
+                BusDate = DateTime.UtcNow,
+                ActionDate = DateTime.UtcNow,
+                ModCode = "CUST",
+                KeyField = "CustId",
+                KeyValue = clientId,
+                MtlType = actionType,
+                MtlStatus = status,
+                Maker = maker,
+                Checker = checker,
+                Description = description
+            });
+            await Task.CompletedTask; // SaveChanges do caller thực hiện
         }
 
         #endregion

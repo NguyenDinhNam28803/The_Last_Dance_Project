@@ -56,7 +56,12 @@ export const ClientService = {
   getNextId: () => api.get('/User/Client/next-id'),
   create: (dto) => api.post('/User/Client', dto),
   update: (id, dto) => api.put(`/User/Client/${id}`, dto),
-  delete: (id) => api.delete(`/User/Client/${id}`)
+  delete: (id) => api.delete(`/User/Client/${id}`),
+  // Maker-Checker trên bản ghi Client
+  approve: (id) => api.post(`/User/Client/${id}/approve`),
+  reject: (id, reason) => api.post(`/User/Client/${id}/reject`, { reason }),
+  requestDelete: (id) => api.post(`/User/Client/${id}/delete-request`),
+  getAudit: (id) => api.get(`/User/Client/${id}/audit`)
 }
 
 export const CustomerContactService = {

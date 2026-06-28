@@ -48,4 +48,10 @@ namespace The_Last_Dance_Project.Dtos
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
     }
+
+    /// <summary>Lý do từ chối khi Checker từ chối bản ghi Client.</summary>
+    public class ClientRejectDto
+    {
+        public string Reason { get; set; } = string.Empty;
+    }
 }
